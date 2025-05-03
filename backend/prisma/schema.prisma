@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  address   String    @unique
+  tokens    Token[]
+  createdAt DateTime  @default(now())
+}
+
+model Token {
+  id         Int      @id @default(autoincrement())
+  tokenId    String   @unique
+  owner      User     @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  rank       Int
+  startTime  DateTime
+  collected  Float    @default(0)
+  isDead     Boolean  @default(false)
+  snapshots  Snapshot[]
+}
+
+model Snapshot {
+  id        Int      @id @default(autoincrement())
+  token     Token    @relation(fields: [tokenIdDB], references: [id])
+  tokenIdDB Int
+  score     Float
+  createdAt DateTime @default(now())
+}
+
+model Reward {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  amount    Float
+  claimed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+} 

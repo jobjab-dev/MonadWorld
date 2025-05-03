@@ -1,0 +1,43 @@
+# ───────── Node / TypeScript ─────────
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ───────── Environment / Secrets ─────
+.env
+.env.*
+*.pem
+
+# ───────── Hardhat / Solidity ────────
+artifacts/
+cache/
+coverage/
+typechain/
+*.tsbuildinfo
+
+# ───────── Frontend (Next.js / Vite) ─
+.next/
+out/
+.vite/
+.eslintcache
+
+# ───────── Prisma / Database ─────────
+prisma/migrations/
+*.db
+*.sqlite
+
+# ───────── OS / Editor files ─────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ───────── Docker / CI  ──────────────
+docker-compose.override.yml
+*.local.yml
