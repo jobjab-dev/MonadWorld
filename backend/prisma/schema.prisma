@@ -11,6 +11,7 @@ model User {
   id        String    @id @default(uuid())
   address   String    @unique
   tokens    Token[]
+  rewards   Reward[]
   createdAt DateTime  @default(now())
 }
 
@@ -41,4 +42,15 @@ model Reward {
   amount    Float
   claimed   Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model LilnadNft {
+  tokenId         String    @id
+  ownerAddress    String
+  rank            Int
+  mintTimestamp   DateTime
+  metadataUri     String?
+  
+  @@map("lilnad_nfts")
+  @@index([ownerAddress])
 } 

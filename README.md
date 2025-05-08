@@ -67,6 +67,8 @@ PRIVATE_KEY=0xYourPrivateKey
 ### Deploy Contract (Testnet)
 ```bash
 $ npx hardhat run scripts/deploy.ts --network monadTestnet
+$ npx hardhat run scripts/deploy-love.ts --network monadTestnet
+$ npx hardhat run scripts/deploy-distributor.ts --network monadTestnet
 # ↳ prints contract address, copy for backend
 ```
 

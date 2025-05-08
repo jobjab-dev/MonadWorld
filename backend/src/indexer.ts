@@ -1,0 +1,142 @@
+import { createPublicClient, http, parseAbiItem, decodeEventLog, Log, Hex, PublicClient, AbiEvent } from 'viem';
+import { PrismaClient } from '@prisma/client';
+import { monadTestnetChain, LILNAD_NFT_CONTRACT_ADDRESS, LILNAD_NFT_ABI, INDEXER_START_BLOCK } from './config';
+
+const prisma = new PrismaClient();
+const publicClient = createPublicClient({
+  chain: monadTestnetChain,
+  transport: http(),
+});
+
+const EVENT_NAME_TO_WATCH = 'RevealAndMint';
+const REVEAL_EVENT_ABI_ITEM = parseAbiItem('event RevealAndMint(address indexed user, uint256 indexed tokenId, uint8 rank, string uri)') as AbiEvent;
+
+// Simpler Log type for broader compatibility (use unknown[] for ABI)
+type GenericLog = Log<bigint, number, false, undefined, true, unknown[]>;
+// Type for args (still useful for structure)
+type RevealEventArgs = {
+    user: Hex;
+    tokenId: bigint;
+    rank: number;
+    uri: string;
+};
+
+let isCatchingUp = false;
+
+async function processLog(log: GenericLog) { // Use GenericLog
+  try {
+    // Decode explicitly here as the generic Log type doesn't guarantee decoded args
+    const decoded = decodeEventLog({ 
+        abi: [REVEAL_EVENT_ABI_ITEM], // Use the specific parsed ABI item
+        data: log.data,
+        topics: log.topics
+    });
+
+    if (decoded.eventName !== EVENT_NAME_TO_WATCH) return;
+
+    const args = decoded.args as RevealEventArgs;
+    const tokenIdStr = args.tokenId.toString();
+
+    if (!log.blockHash) { return; }
+    const block = await publicClient.getBlock({ blockHash: log.blockHash });
+    const timestamp = new Date(Number(block.timestamp) * 1000);
+
+    console.log(`Processing ${decoded.eventName}: User=${args.user}, TokenID=${tokenIdStr}, Rank=${args.rank}, Block=${log.blockNumber}`);
+
+    await prisma.lilnadNft.upsert({
+      where: { tokenId: tokenIdStr },
+      update: { 
+          ownerAddress: args.user,
+          rank: args.rank,
+          mintTimestamp: timestamp,
+          metadataUri: args.uri,
+       },
+      create: { 
+          tokenId: tokenIdStr,
+          ownerAddress: args.user,
+          rank: args.rank,
+          mintTimestamp: timestamp,
+          metadataUri: args.uri,
+       },
+    });
+  } catch (error) {
+    console.error(`Error processing log (tx: ${log.transactionHash}, index: ${log.logIndex}):`, error);
+  }
+}
+
+async function getLogsBatch(fromBlock: bigint, toBlock: bigint): Promise<GenericLog[]> { // Use GenericLog
+    console.log(`Fetching logs from ${fromBlock} to ${toBlock}`);
+    try {
+        const logs = await publicClient.getLogs({
+            address: LILNAD_NFT_CONTRACT_ADDRESS,
+            event: REVEAL_EVENT_ABI_ITEM, // Use the specific parsed ABI item
+            fromBlock: fromBlock,
+            toBlock: toBlock,
+        });
+        return logs as GenericLog[]; // Cast to the simpler log type
+    } catch(err) {
+        console.error(`Error fetching logs in range ${fromBlock}-${toBlock}:`, err);
+        return [];
+    }
+}
+
+async function catchUpOnLogs() {
+  if (isCatchingUp) {
+    console.log("Catch-up process already running.");
+    return;
+  }
+  isCatchingUp = true;
+  console.log("Starting historical log catch-up...");
+
+  try {
+    let fromBlock = INDEXER_START_BLOCK; 
+    let currentBlock = await publicClient.getBlockNumber();
+    console.log(`Catch-up range: ${fromBlock} to ${currentBlock}`);
+
+    const batchSize = BigInt(99); // Adjusted to meet RPC limit (100 range)
+
+    while (fromBlock <= currentBlock) {
+      const toBlock = (fromBlock + batchSize - BigInt(1)) > currentBlock ? currentBlock : (fromBlock + batchSize - BigInt(1));
+      const logs = await getLogsBatch(fromBlock, toBlock);
+      
+      if (logs.length > 0) {
+        console.log(`Processing ${logs.length} logs from block ${fromBlock} to ${toBlock}`);
+        for (const log of logs) {
+          await processLog(log);
+        }
+      }
+      console.log(`Finished batch up to block ${toBlock}.`);
+      fromBlock = toBlock + BigInt(1);
+    }
+    console.log("Historical log catch-up finished.");
+  } catch (error) {
+    console.error("Error during historical log catch-up:", error);
+  } finally {
+    isCatchingUp = false;
+  }
+}
+
+export function startIndexer() {
+  console.log("Starting Indexer: Catching up on historical logs first...");
+
+  catchUpOnLogs().then(() => {
+    console.log("Starting real-time event watcher...");
+    publicClient.watchContractEvent({
+      address: LILNAD_NFT_CONTRACT_ADDRESS,
+      abi: LILNAD_NFT_ABI, // Use full ABI
+      eventName: EVENT_NAME_TO_WATCH,
+      // MODIFIED: Use generic Log[] type for onLogs
+      onLogs: (logs: Log[]) => { 
+        console.log(`Received ${logs.length} new log(s)`);
+        // Explicitly decode each log inside the loop
+        logs.forEach(async (log) => { 
+            await processLog(log as GenericLog);
+        });
+      },
+      onError: (error: Error) => { 
+          console.error("Error watching contract events:", error);
+      }
+    });
+    console.log(`Indexer watching for ${EVENT_NAME_TO_WATCH} events on ${LILNAD_NFT_CONTRACT_ADDRESS}`);
+  });
+}
