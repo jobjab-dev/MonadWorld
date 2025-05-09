@@ -1,6 +1,6 @@
-import LilnadNFTJson from '../../artifacts/contracts/LilnadNFT.sol/LilnadNFT.json' assert { type: 'json' }
-import LoveTokenJson from '../../artifacts/contracts/LoveToken.sol/LoveToken.json' assert { type: 'json' }
-import DistributorJson from '../../artifacts/contracts/LoveDistributor.sol/LoveDistributor.json' assert { type: 'json' }
+import LilnadNFTJson from './abi/LilnadNFT.json' assert { type: 'json' }
+import LoveTokenJson from './abi/LoveToken.json' assert { type: 'json' }
+import DistributorJson from './abi/LoveDistributor.json' assert { type: 'json' }
 import { Abi, parseEther } from 'viem'
 
 // Helper to ensure env vars are read when this module is evaluated.
