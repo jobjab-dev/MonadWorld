@@ -29,9 +29,9 @@ export default function CollectPage() {
       console.log(`Fetching transfer events to ${address} for contract ${LILNAD_NFT_ADDRESS}`);
 
       try {
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
         if (!apiBaseUrl) {
-          throw new Error("API Base URL is not configured.");
+          throw new Error("API Base URL is not configured and window origin unavailable.");
         }
         const response = await fetch(`${apiBaseUrl}/api/nfts/owner/${address}`);
         if (!response.ok) {
