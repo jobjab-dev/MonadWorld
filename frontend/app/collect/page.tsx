@@ -29,25 +29,17 @@ export default function CollectPage() {
       console.log(`Fetching transfer events to ${address} for contract ${LILNAD_NFT_ADDRESS}`);
 
       try {
-        const transferEventAbi = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)');
-
-        const logs = await publicClient.getLogs({
-          address: LILNAD_NFT_ADDRESS,
-          event: transferEventAbi,
-          args: {
-            to: address,
-          },
-          fromBlock: 0n,
-          toBlock: 'latest',
-        });
-
-        console.log(`Found ${logs.length} transfer logs to user.`);
-
-        const ownedTokenIds = [...new Set(logs.map(log => (log.args.tokenId as bigint).toString()))];
-
-        console.log("Owned Token IDs:", ownedTokenIds);
-        setUserTokenIds(ownedTokenIds);
-
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!apiBaseUrl) {
+          throw new Error("API Base URL is not configured.");
+        }
+        const response = await fetch(`${apiBaseUrl}/api/nfts/owner/${address}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setUserTokenIds(data.map((nft: any) => nft.tokenId));
       } catch (error: any) {
         console.error("Error fetching NFT Transfer logs:", error);
         setLoadingError(`Failed to load your NFTs. Error: ${error.message}`);
