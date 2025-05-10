@@ -1,115 +1,110 @@
 'use client';
 
-import { useAccount, useReadContract, useWriteContract, useBlockNumber, useWaitForTransactionReceipt } from 'wagmi';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { LILNAD_NFT_ADDRESS, LilnadNFTAbi } from '@/lib/contracts';
 import { monadTestnet } from '@/lib/chains';
 import { useEffect, useState, useMemo } from 'react';
-import { formatEther } from 'viem';
-import { ethers } from 'ethers'; // For BigNumber operations if needed, or use native BigInt
+import { formatEther, parseEther } from 'viem';
+
+// Expected structure for sbtInfo from props
+interface SbtInfoProp {
+  startTimestamp: string;
+  lastCollect: string;
+  collected: string;
+  isDead: boolean;
+}
+
+// Expected structure for rankData from props
+interface RankDataProp {
+  S: string;
+  T: string;
+}
 
 interface SbtCardProps {
   tokenId: string;
+  initialRank: number; // Rank from DB/indexer
+  initialMetadataUri: string | null; // URI from indexer (RevealAndMint event or from setBaseURI)
+  initialSbtInfo: SbtInfoProp | null; // Null if backend had an error fetching this
+  initialRankData: RankDataProp | null; // Null if backend had an error fetching this
+  onCollectSuccess: () => void; // Callback to refresh data in CollectPage
+  hadBackendError?: boolean; // Optional: flag if backend failed to get sbtInfo/rankData
+  backendErrorMessage?: string; // Optional: error message from backend
 }
 
-// Define type for the RankInfo struct returned by the contract
-type RankInfoType = readonly [S: bigint, T: bigint]; // Assuming S and T are uint256
-// Define type for the SBTInfo struct returned by the contract
-type SBTInfoType = readonly [
-  startTimestamp: bigint,
-  lastCollect: bigint,
-  collected: bigint,
-  isDead: boolean,
-  rank: number // Solidity uint8 maps to number
-];
-
-// Contract Constant (should match contract)
+// Solidity constant (should match contract) - Keep for calculateCollectable
 const ACCRUAL_WINDOW_SECS = 24 * 60 * 60;
 
-// Helper to calculate collectable amount
-function calculateCollectable(sbtInfo: SBTInfoType | undefined, rankInfo: RankInfoType | undefined, currentTimestamp: number): bigint {
-  if (!sbtInfo || !rankInfo || sbtInfo[3] /* isDead */) return BigInt(0);
+// Helper to calculate collectable amount - Modified to take parsed sbtInfo and rankData
+function calculateCollectable(
+  sbtInfo: SbtInfoProp | undefined | null, 
+  rankData: RankDataProp | undefined | null, 
+  currentTimestamp: number
+): bigint {
+  if (!sbtInfo || !rankData || sbtInfo.isDead) return BigInt(0);
 
-  const [_startTimestamp, _lastCollect, _collected, _isDead, _rank] = sbtInfo;
-  const [sValue, tValue] = rankInfo;
+  const startTimestamp = Number(sbtInfo.startTimestamp);
+  const lastCollect = Number(sbtInfo.lastCollect);
+  const collected = BigInt(sbtInfo.collected);
+  const S_val = BigInt(rankData.S);
+  const T_val = Number(rankData.T);
 
-  const startTimestamp = Number(_startTimestamp);
-  const lastCollect = Number(_lastCollect);
-  const collected = _collected;
-  const S = sValue;
-  const T = Number(tValue); // Use T from fetched rankInfo
-
-  if (T === 0) return S - collected > BigInt(0) ? S - collected : BigInt(0);
+  if (T_val === 0) { // If T is 0, it's a one-time collect of S (or remaining S)
+      const remainingToCollect = S_val - collected;
+      return remainingToCollect > BigInt(0) ? remainingToCollect : BigInt(0);
+  }
 
   const elapsedSinceStart = currentTimestamp - startTimestamp;
-  // Check if dead based on current time vs start + T
-  if (elapsedSinceStart >= T) {
-      return BigInt(0); // Already past lifetime
+  // Check if dead based on current time vs start + T (lifetime)
+  if (elapsedSinceStart >= T_val) {
+      return BigInt(0); // Already past lifetime based on contract logic (isDead should also be true from sbtInfo)
   }
 
   const timeSinceLast = currentTimestamp - lastCollect;
+  // Accrual window applies from lastCollect time, up to ACCRUAL_WINDOW_SECS
   const effectiveWindow = Math.min(timeSinceLast, ACCRUAL_WINDOW_SECS);
   if (effectiveWindow <= 0) return BigInt(0);
 
-  // Use BigInt for calculation
-  const potential = (S * BigInt(effectiveWindow)) / BigInt(T);
-  const remaining = S - collected;
-  const toCollect = potential > remaining ? remaining : potential;
+  // Potential accrual based on S * (effectiveWindow / T)
+  const potential = (S_val * BigInt(effectiveWindow)) / BigInt(T_val);
+  const remainingOverall = S_val - collected;
+  
+  // Collect the minimum of what has accrued and what is remaining overall
+  const toCollect = potential > remainingOverall ? remainingOverall : potential;
 
   return toCollect > BigInt(0) ? toCollect : BigInt(0);
 }
 
-export default function SbtCard({ tokenId }: SbtCardProps) {
+export default function SbtCard({ 
+  tokenId, 
+  initialRank, 
+  initialMetadataUri, 
+  initialSbtInfo, 
+  initialRankData, 
+  onCollectSuccess,
+  hadBackendError,
+  backendErrorMessage
+}: SbtCardProps) {
   const tokenIdBigInt = BigInt(tokenId);
-  const [metadataUri, setMetadataUri] = useState<string | null>(null);
+  // State for metadata (image, etc.) - still fetched client-side from URI
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  
+  // State for UI based on props and calculations
   const [collectableAmount, setCollectableAmount] = useState<bigint>(BigInt(0));
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now()); // For re-calculating collectable periodically
 
-  // 1. Read SBT Info
-  const { data: sbtInfoData, isLoading: isLoadingSbtInfo, error: sbtInfoError, refetch: refetchSbtInfo } = useReadContract({
-    address: LILNAD_NFT_ADDRESS,
-    abi: LilnadNFTAbi,
-    functionName: 'sbtInfo',
-    args: [tokenIdBigInt],
-    chainId: monadTestnet.id,
-  });
-
-  // Extract rank safely after sbtInfoData is loaded
-  const rank = useMemo(() => sbtInfoData ? (sbtInfoData as SBTInfoType)[4] : undefined, [sbtInfoData]);
-
-  // 2. Read Rank Data (S and T) based on rank from sbtInfo
-  const { data: rankInfoData, isLoading: isLoadingRankInfo, error: rankInfoError } = useReadContract({
-    address: LILNAD_NFT_ADDRESS,
-    abi: LilnadNFTAbi,
-    functionName: 'rankData', // Public mapping generates getter
-    args: rank !== undefined ? [rank] : undefined,
-    chainId: monadTestnet.id,
-  });
-
-  // 3. Read Token URI
-  const { data: tokenApiUri, isLoading: isLoadingUri, error: uriError } = useReadContract({
-    address: LILNAD_NFT_ADDRESS,
-    abi: LilnadNFTAbi,
-    functionName: 'tokenURI',
-    args: [tokenIdBigInt],
-    chainId: monadTestnet.id,
-  });
-
-  // 4. Get current timestamp approximation
+  // Get current timestamp approximation, updates periodically to refresh collectable amount
   const currentTimestamp = useMemo(() => Math.floor(Date.now() / 1000), [lastUpdateTime]);
 
-  // 5. Fetch Metadata
+  // 1. Fetch Metadata (Image, etc.) from initialMetadataUri
   useEffect(() => {
-    const apiUriString = typeof tokenApiUri === 'string' ? tokenApiUri : null;
-    if (apiUriString && apiUriString !== metadataUri) {
-      setMetadataUri(apiUriString);
-      setImageUrl(null); // Reset image while fetching new metadata
-      setMetadataError(null);
-      console.log(`Fetching metadata for token ${tokenId} from: ${apiUriString}`);
-      fetch(apiUriString)
+    setImageUrl(null); // Reset image
+    setMetadataError(null);
+    if (initialMetadataUri) {
+      console.log(`Fetching metadata for token ${tokenId} from: ${initialMetadataUri}`);
+      fetch(initialMetadataUri)
         .then(res => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status} fetching metadata`);
           return res.json();
         })
         .then(data => {
@@ -121,28 +116,29 @@ export default function SbtCard({ tokenId }: SbtCardProps) {
           }
         })
         .catch(err => {
-          console.error(`Failed to fetch metadata for token ${tokenId}:`, err);
+          console.error(`Failed to fetch metadata for token ${tokenId} from ${initialMetadataUri}:`, err);
           setMetadataError(`Failed to load metadata (${err.message})`);
         });
+    } else if (!hadBackendError) { // Only set this error if backend didn't already report one
+        setMetadataError('Metadata URI not provided.');
     }
-  }, [tokenApiUri, tokenId, metadataUri]);
+  }, [initialMetadataUri, tokenId, hadBackendError]); // Re-fetch if URI or tokenId changes
 
-  // 6. Calculate collectable amount
+  // 2. Calculate collectable amount (derived from props and current time)
   useEffect(() => {
-    if (sbtInfoData && rankInfoData) {
-      // Cast data to the defined types for type safety
-      const collectable = calculateCollectable(sbtInfoData as SBTInfoType, rankInfoData as RankInfoType, currentTimestamp);
+    if (initialSbtInfo && initialRankData) {
+      const collectable = calculateCollectable(initialSbtInfo, initialRankData, currentTimestamp);
       setCollectableAmount(collectable);
     }
-  }, [sbtInfoData, rankInfoData, currentTimestamp]);
+  }, [initialSbtInfo, initialRankData, currentTimestamp]);
 
-  // 7. Update timestamp periodically
+  // 3. Update currentTimestamp periodically to re-calculate collectable amount
   useEffect(() => {
     const interval = setInterval(() => setLastUpdateTime(Date.now()), 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // 8. Handle Collect Transaction
+  // 4. Handle Collect Transaction (this part remains largely the same)
   const { writeContractAsync: collectWrite, isPending: isCollecting, error: collectError } = useWriteContract();
   const [collectTxHash, setCollectTxHash] = useState<`0x${string}` | undefined>();
   const { isLoading: isWaitingCollectTx, isSuccess: collectTxSuccess } = useWaitForTransactionReceipt({
@@ -151,9 +147,8 @@ export default function SbtCard({ tokenId }: SbtCardProps) {
   });
 
   const handleCollect = async () => {
-      if (!rankInfoData || collectableAmount <= BigInt(0)) return; // Need rankInfo for checks
-      const info = sbtInfoData as SBTInfoType | undefined;
-      if (!info || info[3] /* isDead */) return; // Prevent collecting if dead
+      // Use initialSbtInfo for dead check and initialRankData for existence check
+      if (!initialSbtInfo || initialSbtInfo.isDead || !initialRankData || collectableAmount <= BigInt(0)) return;
 
       setCollectTxHash(undefined);
       try {
@@ -171,45 +166,40 @@ export default function SbtCard({ tokenId }: SbtCardProps) {
       }
   };
 
-  // 9. Effect to refetch SBT info after successful collect
+  // 5. Effect to call onCollectSuccess (passed from CollectPage) after successful collect
   useEffect(() => {
       if (collectTxSuccess) {
-          refetchSbtInfo();
+          onCollectSuccess(); // Call the callback to refresh data in CollectPage
           setCollectTxHash(undefined); 
       }
-  }, [collectTxSuccess, refetchSbtInfo]);
+  }, [collectTxSuccess, onCollectSuccess]);
 
 
   // --- Rendering Logic ---
-  if (isLoadingSbtInfo || isLoadingUri || (rank !== undefined && isLoadingRankInfo)) {
-    return <div className="p-4 border rounded border-gray-700 bg-gray-800 text-center">Loading NFT #{tokenId}...</div>;
-  }
+  // Loading state is now primarily managed by CollectPage for the list.
+  // SbtCard shows loading for its own metadata fetching or if critical data is missing.
 
-  const combinedError = sbtInfoError || uriError || rankInfoError;
-  if (combinedError) {
-    return <div className="p-4 border rounded border-red-700 bg-red-900 text-center text-red-200">Error loading NFT #{tokenId}: {combinedError.message}</div>;
+  if (hadBackendError) {
+    return (
+      <div className="p-4 border rounded border-red-700 bg-red-900 text-center text-red-200">
+        Error loading on-chain data for NFT #{tokenId} from backend: {backendErrorMessage || 'Unknown error'}
+      </div>
+    );
   }
-
-  if (!sbtInfoData) {
-     return <div className="p-4 border rounded border-gray-700 bg-gray-800 text-center">No data found for NFT #{tokenId}.</div>;
-  }
-  if (rank === undefined) {
-     return <div className="p-4 border rounded border-gray-700 bg-gray-800 text-center">Could not determine rank for NFT #{tokenId}.</div>;
-  }
-   if (!rankInfoData) {
-     return <div className="p-4 border rounded border-gray-700 bg-gray-800 text-center">Could not load rank details for NFT #{tokenId}.</div>;
-   }
-
-  // Reconstruct info using the correct types
-  const info = sbtInfoData as SBTInfoType;
-  const rankInfo = rankInfoData as RankInfoType;
   
-  const isDead = info[3]; // Use the fetched isDead status
-  const rankName = ['UR', 'SSR', 'SR', 'R', 'UC', 'C'][rank] ?? 'Unknown';
-  const collectedDisplay = formatEther(info[2]); // collected
+  if (!initialSbtInfo || !initialRankData) {
+    // This case might occur if backend successfully fetched the NFT list but failed for this specific one
+    // or if data is just not available for some reason (should be covered by hadBackendError mostly)
+    return <div className="p-4 border rounded border-gray-700 bg-gray-800 text-center">Loading on-chain details for NFT #{tokenId}...</div>;
+  }
+
+  // Use initialSbtInfo and initialRankData for display
+  const rankName = ['UR', 'SSR', 'SR', 'R', 'UC', 'C'][initialRank] ?? 'Unknown'; // Use initialRank from props
+  const collectedDisplay = formatEther(BigInt(initialSbtInfo.collected));
   const collectableDisplay = formatEther(collectableAmount);
-  const lastCollectDate = new Date(Number(info[1]) * 1000).toLocaleString();
-  const mintedDate = new Date(Number(info[0]) * 1000).toLocaleString();
+  const lastCollectDate = new Date(Number(initialSbtInfo.lastCollect) * 1000).toLocaleString();
+  const mintedDate = new Date(Number(initialSbtInfo.startTimestamp) * 1000).toLocaleString();
+  const isDeadDisplay = initialSbtInfo.isDead;
 
   return (
     <div className="p-4 border rounded-lg border-gray-700 bg-gray-800 shadow-md w-full max-w-sm text-sm">
@@ -222,29 +212,28 @@ export default function SbtCard({ tokenId }: SbtCardProps) {
         <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded mb-2 text-gray-400">Loading Image...</div>
       )}
       <div className="space-y-1">
-        <p><span className="font-medium text-gray-400">Rank:</span> {rankName} ({rank})</p>
-        <p><span className="font-medium text-gray-400">Status:</span> {isDead ? <span className="text-red-400">Dead</span> : <span className="text-green-400">Alive</span>}</p>
+        <p><span className="font-medium text-gray-400">Rank:</span> {rankName} ({initialRank})</p>
+        <p><span className="font-medium text-gray-400">Status:</span> {isDeadDisplay ? <span className="text-red-400">Dead</span> : <span className="text-green-400">Alive</span>}</p>
         <p><span className="font-medium text-gray-400">Score Collected:</span> {collectedDisplay}</p>
         <p><span className="font-medium text-gray-400">Collectable Now:</span> ≈ {collectableDisplay}</p>
         <p className="text-xs text-gray-500"><span className="font-medium">Last Collect:</span> {lastCollectDate}</p>
         <p className="text-xs text-gray-500"><span className="font-medium">Minted:</span> {mintedDate}</p>
-        {metadataUri && <p className="text-xs text-gray-500 truncate"><span className="font-medium">Metadata:</span> <a href={metadataUri} target="_blank" className="text-blue-400">{metadataUri}</a></p>}
+        {initialMetadataUri && <p className="text-xs text-gray-500 truncate"><span className="font-medium">Metadata:</span> <a href={initialMetadataUri} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{initialMetadataUri}</a></p>}
       </div>
 
-      {!isDead && collectableAmount > BigInt(0) && (
+      {!isDeadDisplay && collectableAmount > BigInt(0) && (
         <button 
           onClick={handleCollect}
           disabled={isCollecting || isWaitingCollectTx}
-          className="mt-4 w-full px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+          className="mt-4 w-full px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 transition-colors duration-150"
         >
           {isCollecting ? 'Confirming...' : (isWaitingCollectTx ? 'Collecting...' : `Collect ${collectableDisplay} Score`)}
         </button>
       )}
       {collectTxHash && (
-          <p className="text-xs text-gray-400 mt-1">Collect Tx: <a href={`${monadTestnet.blockExplorers.default.url}/tx/${collectTxHash}`} target="_blank" className="text-blue-400">{collectTxHash.slice(0,6)}...</a>{isWaitingCollectTx?" (Pending)":""}</p>
+          <p className="text-xs text-gray-400 mt-1">Collect Tx: <a href={`${monadTestnet.blockExplorers.default.url}/tx/${collectTxHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{collectTxHash.slice(0,6)}...{collectTxHash.slice(-4)}</a>{isWaitingCollectTx?" (Pending)":" (Confirmed)"}</p>
       )}
-      {collectError && <p className="text-xs text-red-500 mt-1">Collect Error: {collectError.message}</p>}
-
+      {collectError && <p className="text-xs text-red-500 mt-1">Collect Error: {collectError.message.length > 100 ? collectError.message.substring(0,100)+"...": collectError.message}</p>}
     </div>
   );
 } 

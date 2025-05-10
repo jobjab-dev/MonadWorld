@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { ethers, Contract, utils as ethersUtils } from 'ethers';
+import { ethers, Contract, utils as ethersUtils, BigNumber } from 'ethers';
 import cron from 'cron';
 import { startIndexer } from './indexer';
 import { LILNAD_NFT_CONTRACT_ADDRESS, LILNAD_NFT_ABI } from './config';
@@ -50,6 +50,56 @@ if (LILNAD_NFT_CONTRACT_ADDRESS && contractAbiForEthers.length > 0 && provider) 
   if (!provider) console.error('- Provider is not initialized.');
 }
 
+// --- RankData Cache ---
+interface RankDataCacheEntry {
+    S: string;
+    T: string;
+}
+const rankDataCache = new Map<number, RankDataCacheEntry>();
+let isRankDataCacheInitialized = false;
+
+// Define types for contract call results based on ABI
+interface RankDataResultType { S: BigNumber; T: BigNumber; }
+interface SbtInfoResultType { startTimestamp: BigNumber; lastCollect: BigNumber; collected: BigNumber; isDead: boolean; rank: number; }
+
+async function initializeRankDataCache() {
+    if (isRankDataCacheInitialized || !lilnadNftContract) return;
+    console.log('Initializing RankData cache...');
+    try {
+        const rankPromises = [];
+        for (let i = 0; i <= 5; i++) { // Assuming ranks 0-5
+            rankPromises.push(
+                lilnadNftContract.rankData(i)
+                    .then((rd: RankDataResultType) => ({rankId: i, S: rd.S.toString(), T: rd.T.toString(), error: false }))
+                    .catch((err: Error) => { 
+                        console.error(`Error fetching rankData for rank ${i}:`, err.message);
+                        return {rankId: i, S: '0', T: '0', error: true }; // Provide default/error state
+                    })
+            );
+        }
+        const results = await Promise.all(rankPromises);
+        results.forEach(r => {
+            if (!r.error) { // Only cache if no error
+                rankDataCache.set(r.rankId, {S: r.S, T: r.T});
+            }
+        });
+        isRankDataCacheInitialized = true;
+        console.log('RankData cache initialized successfully:', rankDataCache);
+        if (results.some(r => r.error)) {
+            console.warn('Some ranks failed to initialize in RankData cache.');
+        }
+    } catch (error) {
+        console.error('Failed to initialize RankData cache (overall error):', error);
+        isRankDataCacheInitialized = false; 
+    }
+}
+// Attempt to initialize cache at startup, but it's okay if it fails (e.g. RPC not ready)
+// It will be retried on first API call that needs it.
+if (lilnadNftContract) {
+    initializeRankDataCache();
+}
+// --- End RankData Cache ---
+
 // ABI helper for sbtInfo view (returns startTimestamp, collected, isDead, rank)
 const gameInterface = new ethers.utils.Interface([
   'function sbtInfo(uint256) view returns (uint256 startTimestamp,uint256 collected,bool isDead,uint8 rank)'
@@ -67,6 +117,10 @@ app.get('/leaderboard', async (req, res) => {
 // API Endpoint to get NFTs by Owner (Enhanced)
 app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
   const { ownerAddress } = req.params;
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 20; // Default limit to 20, adjust as needed
+  const skip = (page - 1) * limit;
+
   if (!ownerAddress || !/^0x[a-fA-F0-9]{40}$/.test(ownerAddress)) {
     return res.status(400).json({ error: 'Invalid owner address format.' });
   }
@@ -76,65 +130,121 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
     return res.status(500).json({ error: 'NFT Contract not initialized on backend. Check server logs.' });
   }
 
+  // Ensure RankData cache is warm
+  if (!isRankDataCacheInitialized) {
+    await initializeRankDataCache();
+    if (!isRankDataCacheInitialized) { // Check again after attempt
+        // If still not initialized, we might have to proceed without it or error out
+        console.warn('RankData cache could not be initialized. Proceeding without it for this request, rankData might be missing for NFTs.');
+    }
+  }
+
   try {
+    const totalNfts = await prisma.lilnadNft.count({ where: { ownerAddress: ownerAddress } });
+    if (totalNfts === 0) {
+      return res.json({ data: [], currentPage: page, totalPages: 0, totalItems: 0 });
+    }
+
     const nftsFromDb = await prisma.lilnadNft.findMany({
       where: { ownerAddress: ownerAddress },
       select: { tokenId: true, rank: true, metadataUri: true },
-      orderBy: { tokenId: 'asc' },
+      orderBy: { tokenId: 'asc' }, // Consider if a different order is better for pagination (e.g., mintTimestamp)
+      skip: skip,
+      take: limit,
     });
 
-    if (nftsFromDb.length === 0) {
-      return res.json([]);
+    if (nftsFromDb.length === 0 && totalNfts > 0 && page > 1) { // Page requested is out of bounds
+        return res.json({ data: [], currentPage: page, totalPages: Math.ceil(totalNfts / limit), totalItems: totalNfts, message: "Page out of bounds" });
     }
+    
+    const currentServerTimestamp = Math.floor(Date.now() / 1000);
 
-    const enhancedNfts = [];
-    for (const nftDb of nftsFromDb) {
+    // Parallelize sbtInfo calls
+    const sbtInfoPromises = nftsFromDb.map(nftDb => 
+      lilnadNftContract!.sbtInfo(ethers.BigNumber.from(nftDb.tokenId))
+        .then((sbtInfoRaw: SbtInfoResultType) => ({ tokenId: nftDb.tokenId, sbtInfoRaw, error: null }))
+        .catch((err: Error) => ({ tokenId: nftDb.tokenId, sbtInfoRaw: null, error: err }))
+    );
+    const sbtInfoResults = await Promise.all(sbtInfoPromises);
+    const sbtInfoMap = new Map(sbtInfoResults.map(r => [r.tokenId, {raw: r.sbtInfoRaw, error: r.error}]));
+
+    const enhancedNfts = []; // Initialize as an empty array
+    for (const nftDb of nftsFromDb) { // Use a for...of loop
+      const sbtInfoFetchResult = sbtInfoMap.get(nftDb.tokenId);
+      const sbtInfoResultRaw = sbtInfoFetchResult?.raw;
+      const fetchError = sbtInfoFetchResult?.error;
+      
+      let sbtInfoData = null;
+      let rankDataResult: RankDataCacheEntry | undefined | null = null;
+      let errorFetchingOnChain = false;
+      let specificErrorMessage = 'Unknown error';
+
       try {
         const tokenIdBigNumber = ethers.BigNumber.from(nftDb.tokenId);
-        // Assuming nftDb.rank is always a number (Int from Prisma schema)
-        // Contract expects uint8, which JS numbers can represent directly if within range 0-255
         const rankUint8: number = nftDb.rank;
+
         if (typeof rankUint8 !== 'number' || rankUint8 < 0 || rankUint8 > 255) {
-            console.error(`Invalid rank for tokenId ${nftDb.tokenId}: ${rankUint8}. Skipping on-chain fetch for this NFT.`);
             throw new Error(`Invalid rank value: ${rankUint8}`);
         }
 
-        const sbtInfoResult = await lilnadNftContract.sbtInfo(tokenIdBigNumber);
-        const rankDataResult = await lilnadNftContract.rankData(rankUint8);
+        rankDataResult = rankDataCache.get(rankUint8); // Get from cache
 
-        enhancedNfts.push({
-          tokenId: nftDb.tokenId,
-          rank: nftDb.rank,
-          metadataUriFromIndexer: nftDb.metadataUri,
-          sbtInfo: {
-            startTimestamp: sbtInfoResult.startTimestamp.toString(),
-            lastCollect: sbtInfoResult.lastCollect.toString(),
-            collected: sbtInfoResult.collected.toString(),
-            isDead: sbtInfoResult.isDead,
-          },
-          rankData: {
-            S: rankDataResult.S.toString(),
-            T: rankDataResult.T.toString(),
-          },
-        });
+        if (!rankDataResult && isRankDataCacheInitialized) {
+            // This case means rank is valid (0-255) but not found in cache (0-5), which is an issue.
+            // Or cache wasn't initialized properly for this rank.
+            console.warn(`RankData for rank ${rankUint8} not found in cache. Attempting direct fetch (fallback).`);
+            // Fallback: try to fetch directly if missing from cache, though ideally cache should be complete.
+            const rdDirect = await lilnadNftContract.rankData(rankUint8);
+            rankDataResult = { S: rdDirect.S.toString(), T: rdDirect.T.toString() };
+            // Optionally add to cache here if deemed safe
+            // rankDataCache.set(rankUint8, rankDataResult);
+        } else if (!rankDataResult && !isRankDataCacheInitialized){
+            console.warn(`RankData cache not initialized, and no data for rank ${rankUint8}. RankData will be null.`);
+            // rankDataResult remains null
+        }
+        
+        let isActuallyDead = sbtInfoResultRaw.isDead;
+        if (rankDataResult && rankDataResult.T && Number(rankDataResult.T) > 0) {
+            const lifetime = Number(rankDataResult.T);
+            const startTime = Number(sbtInfoResultRaw.startTimestamp.toString());
+            if (currentServerTimestamp >= startTime + lifetime) {
+                isActuallyDead = true;
+            }
+        }
+
+        sbtInfoData = {
+            startTimestamp: sbtInfoResultRaw.startTimestamp.toString(),
+            lastCollect: sbtInfoResultRaw.lastCollect.toString(),
+            collected: sbtInfoResultRaw.collected.toString(),
+            isDead: isActuallyDead, // Use the re-calculated isDead
+        };
+
       } catch (contractError: any) {
         console.error(`Error fetching on-chain data for tokenId ${nftDb.tokenId} (rank ${nftDb.rank}):`, contractError.message);
-        enhancedNfts.push({
-          tokenId: nftDb.tokenId,
-          rank: nftDb.rank,
-          metadataUriFromIndexer: nftDb.metadataUri,
-          sbtInfo: null,
-          rankData: null,
-          errorFetchingOnChainData: true,
-          errorMessage: contractError.message || 'Unknown contract error',
-          // errorStack: contractError.stack, // Can be very verbose
-        });
+        errorFetchingOnChain = true;
+        specificErrorMessage = contractError.message;
       }
+      
+      enhancedNfts.push({ // Push to the array
+        tokenId: nftDb.tokenId,
+        rank: nftDb.rank,
+        metadataUriFromIndexer: nftDb.metadataUri,
+        sbtInfo: sbtInfoData,
+        rankData: rankDataResult, // This could be null if cache failed and direct fetch also failed
+        errorFetchingOnChainData: errorFetchingOnChain,
+        errorMessage: errorFetchingOnChain ? specificErrorMessage : undefined,
+      });
     }
-    console.log(`Found and enhanced ${enhancedNfts.length} NFTs for owner ${ownerAddress}`);
-    res.json(enhancedNfts);
+
+    res.json({
+      data: enhancedNfts,
+      currentPage: page,
+      totalPages: Math.ceil(totalNfts / limit),
+      totalItems: totalNfts,
+    });
+
   } catch (error: any) {
-    console.error(`Error in /api/nfts/owner/${ownerAddress} handler:`, error);
+    console.error(`Error in /api/nfts/owner/${ownerAddress} (page ${page}, limit ${limit}):`, error);
     res.status(500).json({ error: 'Failed to fetch and enhance NFTs.', details: error.message });
   }
 });
