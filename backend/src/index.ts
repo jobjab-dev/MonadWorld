@@ -25,7 +25,10 @@ console.log('BACKEND_PUBLIC_URL (from .env.local via process.env for constructin
 console.log('---------------------------------------------------');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://www.monadworld.xyz', 'http://localhost:3000'],
+  credentials: true,
+}));
 app.use(bodyParser.json());
 
 const prisma = new PrismaClient();
@@ -181,14 +184,26 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
   }
 
   try {
-    const totalNfts = await prisma.lilnadNft.count({ where: { ownerAddress: ownerAddress } });
+    // Use the current contract address from config
+    const currentContractAddress = LILNAD_NFT_CONTRACT_ADDRESS;
+
+    const totalNfts = await prisma.lilnadNft.count({ 
+      where: { 
+        ownerAddress: ownerAddress,
+        contractAddress: currentContractAddress // Filter by current contract address
+      } 
+    });
+
     if (totalNfts === 0) {
       return res.json({ data: [], currentPage: page, totalPages: 0, totalItems: 0 });
     }
 
     const nftsFromDb = await prisma.lilnadNft.findMany({
-      where: { ownerAddress: ownerAddress },
-      select: { tokenId: true, rank: true },
+      where: { 
+        ownerAddress: ownerAddress,
+        contractAddress: currentContractAddress // Filter by current contract address
+      },
+      select: { tokenId: true, rank: true }, // Keep select minimal, other data comes from contract/cache
       orderBy: [
         { rank: 'asc' },      // Primary sort: Rank 0 (UR) comes first
         { tokenId: 'asc' }   // Secondary sort: Lower token IDs first if ranks are same
@@ -310,8 +325,17 @@ app.get('/api/metadata/lilnad/:tokenId', async (req, res) => {
   }
 
   try {
+    // Use the current contract address from config
+    const currentContractAddress = LILNAD_NFT_CONTRACT_ADDRESS;
+
     const nft = await prisma.lilnadNft.findUnique({
-      where: { tokenId: tokenId },
+      where: {
+        // Query using the composite key defined in schema.prisma
+        contractAddress_tokenId: {
+          contractAddress: currentContractAddress,
+          tokenId: tokenId 
+        }
+      },
     });
 
     if (!nft) {

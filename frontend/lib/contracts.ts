@@ -37,4 +37,4 @@ export const LilnadNFTAbi = LilnadNFTJson.abi as Abi
 export const LoveTokenAbi = LoveTokenJson.abi as Abi
 export const DistributorAbi = DistributorJson.abi as Abi
 
-export const MINT_FEE = parseEther('0.01')        // 1 MON 
+export const MINT_FEE = parseEther('1')        // 1 MON 

@@ -45,12 +45,15 @@ model Reward {
 }
 
 model LilnadNft {
-  tokenId         String    @id
+  id              String    @id @default(cuid())
+  tokenId         String    // Token ID from contract
   ownerAddress    String
+  contractAddress String    // Required: Will store the current contract address
   rank            Int
-  mintTimestamp   DateTime
+  mintTimestamp   DateTime  // This should be set by the indexer
   metadataUri     String?
-  
+
   @@map("lilnad_nfts")
   @@index([ownerAddress])
+  @@unique([contractAddress, tokenId])
 } 
