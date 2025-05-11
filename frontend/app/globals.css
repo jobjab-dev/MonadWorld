@@ -555,3 +555,187 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   pointer-events: none !important;
   z-index: 1 !important;
 }
+
+/* DOCS PAGE SPECIFIC STYLES - USING STANDARD CSS WITH !IMPORTANT TO OVERRIDE GLOBALS */
+
+.docs-container {
+  max-width: 56rem; /* equivale a max-w-5xl */
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #482880; /* pixel-purple-dark */
+  padding: 2.5rem; /* equivale a p-10 +/- */
+  border-radius: 0.25rem; /* equivale a rounded-pixel-md (4px) */
+  border-width: 4px;
+  border-color: #8A2BE2; /* pixel-purple-medium */
+  box-shadow: 6px 6px 0px #000 !important; /* equivale a shadow-pixel-xl */
+}
+
+.docs-main-title-container {
+  display: flex !important;
+  justify-content: center !important;
+  margin-bottom: 3rem !important; /* equivale a mb-12 */
+}
+
+.docs-h1 {
+  font-size: 2.5rem !important; /* Match global h1 */
+  font-weight: bold !important;
+  color: #F0E68C !important; /* pixel-accent */
+  letter-spacing: 2px !important; /* Match global h1 */
+  border-width: 4px !important;
+  border-style: solid !important;
+  border-color: #8A2BE2 !important; /* pixel-purple-medium, match global h1 border */
+  border-top-color: #BA68C8 !important; /* match global h1 border */
+  border-left-color: #BA68C8 !important; /* match global h1 border */
+  border-right-color: #6A1B9A !important; /* match global h1 border */
+  border-bottom-color: #6A1B9A !important; /* match global h1 border */
+  padding: 0.625rem 1.25rem !important; /* 10px 20px, match global h1 padding */
+  box-shadow: 8px 8px 0px #000 !important; /* Match global h1 shadow */
+  text-transform: uppercase !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-shadow: 3px 3px 0 #000 !important; /* Match global h1 text-shadow */
+  background-color: #4B0082 !important; /* brand-purple-dark, match global h1 background */
+  display: inline-block !important;
+  position: relative !important; /* Needed for pseudo-elements if you add them back */
+}
+
+.docs-h2 {
+  font-size: 1.875rem !important; /* equivale a text-2xl/3xl */
+  font-weight: bold !important;
+  color: #F0E68C !important; /* pixel-accent */
+  border-bottom-width: 4px !important;
+  border-bottom-color: #8A2BE2 !important; /* pixel-purple-medium */
+  padding-bottom: 0.75rem !important;
+  margin-bottom: 1.5rem !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-shadow: 3px 3px 0 #000 !important;
+}
+
+.docs-h3 {
+  font-size: 1.5rem !important; /* equivale a text-xl/2xl */
+  font-weight: 600 !important; /* semibold */
+  color: #D8BFD8 !important; /* pixel-purple-light */
+  margin-bottom: 0.75rem !important;
+  margin-top: 1.5rem !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+.docs-h4 {
+  font-size: 1.25rem !important; /* equivale a text-lg/xl */
+  font-weight: 600 !important;
+  color: #E6E6FA !important; /* pixel-text */
+  margin-bottom: 0.25rem !important;
+  text-align: left !important;
+  text-transform: uppercase !important; /* Kept uppercase for consistency with other h tags */
+  letter-spacing: 0.5px !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+.docs-paragraph {
+  font-size: 1rem !important; /* text-base */
+  line-height: 1.75 !important; /* leading-relaxed */
+  text-align: left !important;
+  margin-bottom: 1rem !important;
+  color: #E6E6FA !important; /* pixel-text */
+  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  text-transform: none !important; /* CRITICAL: Override global uppercase for paragraphs */
+  text-shadow: none !important; /* CRITICAL: Override global text-shadow for paragraphs */
+  letter-spacing: normal !important; /* CRITICAL: Override global letter-spacing */
+}
+
+.docs-sub-paragraph {
+  font-size: 0.9rem !important; /* text-sm or slightly larger */
+  opacity: 0.9 !important;
+  line-height: 1.65 !important; /* leading-relaxed adjusted */
+  text-align: left !important;
+  margin-bottom: 0.75rem !important;
+  color: #E6E6FA !important; /* pixel-text */
+  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  text-transform: none !important;  /* CRITICAL */
+  text-shadow: none !important; /* CRITICAL */
+  letter-spacing: normal !important; /* CRITICAL */
+}
+
+.docs-list {
+  list-style-type: disc !important;
+  list-style-position: inside !important;
+  margin-bottom: 1rem !important;
+  padding-left: 1.25rem !important; /* pl-5 */
+  text-align: left !important;
+}
+
+.docs-list li {
+  font-size: 1rem !important; /* text-base */
+  line-height: 1.75 !important;
+  margin-bottom: 0.5rem !important; /* space-y-2 on parent */
+  color: #E6E6FA !important; /* pixel-text */
+  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  text-transform: none !important; /* CRITICAL */
+  text-shadow: none !important; /* CRITICAL */
+  letter-spacing: normal !important; /* CRITICAL */
+}
+
+/* For lists that are slightly smaller, like in Roadmap */
+.docs-list-sm li {
+  font-size: 0.9rem !important;
+  line-height: 1.65 !important;
+  margin-bottom: 0.25rem !important; /* space-y-1 on parent */
+}
+
+.docs-section-divider {
+  border-color: #8A2BE2 !important; /* pixel-purple-medium */
+  margin-top: 2rem !important; /* my-8 */
+  margin-bottom: 2rem !important; /* my-8 */
+  border-top-width: 2px !important; /* A bit thicker for clear separation */
+}
+
+.docs-back-button-container {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 4rem !important; /* mt-16 */
+}
+
+.docs-back-button {
+  padding: 1rem 2rem !important; /* px-8 py-4 */
+  background-color: #F0E68C !important; /* pixel-accent */
+  color: black !important;
+  font-size: 1.125rem !important; /* text-lg */
+  font-weight: bold !important;
+  border-radius: 0.25rem !important; /* rounded-pixel-md */
+  box-shadow: 6px 6px 0px #000 !important;
+  transition: all 0.15s ease-in-out !important;
+  border-width: 2px !important;
+  border-color: #DAA520 !important; /* amber-700 */
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+.docs-back-button:hover {
+  background-color: #FFD700 !important; /* gold (lighter yellow for hover) */
+  box-shadow: 4px 4px 0px #000 !important;
+  transform: translate(2px, 2px) !important;
+}
+
+.docs-contract-section {
+  padding-left: 1rem !important; /* pl-4 */
+  border-left-width: 2px !important;
+  border-left-color: #8A2BE2 !important; /* pixel-purple-medium */
+  margin-left: 0.5rem !important; /* ml-2 */
+  text-align: left !important;
+}
+
+.docs-contract-section > div:not(:last-child) {
+    margin-bottom: 1.5rem; /* space-y-6 between items */
+}
+
+.docs-contract-item {
+  padding-top: 0.25rem !important; /* pt-1 */
+}

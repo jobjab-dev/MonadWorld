@@ -32,6 +32,7 @@ export default function Navbar() {
               <Link href="/collect" className="px-2 py-1 md:px-3 md:py-2 rounded-pixel-sm text-sm font-medium text-pixel-text hover:bg-pixel-purple-medium hover:text-white transition-colors">Collect</Link>
               <Link href="/world" className="px-2 py-1 md:px-3 md:py-2 rounded-pixel-sm text-sm font-medium text-pixel-text hover:bg-pixel-purple-medium hover:text-white transition-colors">World</Link>
               <Link href="/leaderboard" className="px-2 py-1 md:px-3 md:py-2 rounded-pixel-sm text-sm font-medium text-pixel-text hover:bg-pixel-purple-medium hover:text-white transition-colors">Leaderboard</Link>
+              <Link href="/docs" className="px-2 py-1 md:px-3 md:py-2 rounded-pixel-sm text-sm font-medium text-pixel-text hover:bg-pixel-purple-medium hover:text-white transition-colors">Docs</Link>
             </div>
           </div>
           <div className="flex items-center space-x-2 md:space-x-3">

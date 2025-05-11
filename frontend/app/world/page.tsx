@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAccount, useReadContract } from 'wagmi';
+import { useState, useEffect, ReactNode } from 'react';
+import { useAccount } from 'wagmi';
 import { monadTestnet } from '@/lib/chains';
 import Link from 'next/link';
-import { LILNAD_NFT_ABI, LILNAD_NFT_ADDRESS } from '@/lib/contracts'; // Assuming you have this
+// import { LILNAD_NFT_ABI, LILNAD_NFT_ADDRESS } from '@/lib/contracts'; // Commented out ABI/Address import
 
 // ข้อมูลสรุป NFT แยกตาม rank
 interface NftSummary {
@@ -48,25 +48,23 @@ export default function WorldPage() {
     countByRank: {}
   });
   
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Set to false initially as we are not loading from contract yet
   const [error, setError] = useState<string | null>(null);
   const [selectedRank, setSelectedRank] = useState<number | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false); // To render frogs immediately
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Commented out useReadContract and related useEffects
+  /*
   const { data: contractData, error: contractError, isLoading: isContractLoading, refetch } = useReadContract({
-    abi: LILNAD_NFT_ABI,
+    abi: LILNAD_NFT_ABI, // This would cause an error if ABI is not defined
     address: LILNAD_NFT_ADDRESS,
     functionName: 'getNftsSummary',
-    args: [address!], // Ensure address is not undefined
+    args: [address!],
     chainId: monadTestnet.id,
     query: {
       enabled: !!address && isConnected && chain?.id === monadTestnet.id,
     },
   });
-
-  useEffect(() => {
-    setIsInitialized(true); // Allow rendering frogs (even if empty) immediately
-  }, []);
 
   useEffect(() => {
     setIsLoading(isContractLoading);
@@ -88,20 +86,56 @@ export default function WorldPage() {
       });
       console.log("Processed NFT Summary from contract:", summary);
       setNftSummary(summary);
-      setError(null); // Clear previous errors if data is successful
+      setError(null);
     }
   }, [contractData, contractError, isContractLoading]);
 
-  // Refetch data when address or chain changes
   useEffect(() => {
     if (isConnected && address && chain?.id === monadTestnet.id) {
       refetch();
     }
   }, [address, isConnected, chain, refetch]);
+  */
 
+  useEffect(() => {
+    setIsInitialized(true);
+    // Placeholder: Simulate loading or set mock data if desired
+    // For now, it will just show "Your Lilnads: 0" until contract integration is complete
+    // Or, you can fetch from your existing API as a temporary measure:
+    /*
+    async function fetchSummaryFromApi() {
+      if (!isConnected || !address) {
+        setIsLoading(false);
+        setNftSummary({ totalCount: 0, countByRank: {} });
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+        const response = await fetch(`${apiBaseUrl}/api/nfts/owner/${address}?page=1&limit=1000`); // Fetch all for summary
+        if (!response.ok) throw new Error('Failed to fetch from API');
+        const data = await response.json();
+        if (data && Array.isArray(data.data)) {
+          const liveNfts = data.data.filter((nft: any) => !nft.sbtInfo?.isDead && !nft.calculated?.isActuallyDead);
+          const summary: NftSummary = { totalCount: liveNfts.length, countByRank: {} };
+          liveNfts.forEach((nft: any) => {
+            const rank = nft.rank || 0;
+            summary.countByRank[rank] = (summary.countByRank[rank] || 0) + 1;
+          });
+          setNftSummary(summary);
+        }
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchSummaryFromApi();
+    */
+  }, [address, isConnected]);
 
   const renderFrogs = (): React.ReactNode[] => {
-    if (!isInitialized) return [];
+    if (!isInitialized || isLoading) return []; // Don't render frogs if not initialized or still loading
     
     const frogs: React.ReactNode[] = [];
     
@@ -138,7 +172,7 @@ export default function WorldPage() {
       }
     });
     
-    console.log(`Rendering ${frogs.length} frogs. NFT Summary:`, nftSummary);
+    // console.log(`Rendering ${frogs.length} frogs. NFT Summary:`, nftSummary); 
     return frogs;
   };
 
@@ -199,7 +233,7 @@ export default function WorldPage() {
                 <p className="text-red-200 font-bold mb-2">Error loading NFT data!</p>
                 <p className="text-red-300 text-xs mb-3">{error}</p>
                 <button 
-                  onClick={() => refetch()} // Changed to refetch
+                  onClick={() => { /* Placeholder for refetch logic if not using useReadContract */ }}
                   className="px-3 py-1 bg-red-600 text-white text-sm rounded-pixel-sm hover:bg-red-500"
                 >
                   Try Again
@@ -214,7 +248,7 @@ export default function WorldPage() {
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-4xl">
           {Object.entries(nftSummary.countByRank).map(([rankStr, count]) => {
             const rank = parseInt(rankStr);
-            if (count === 0) return null; // Don't show rank if count is 0
+            if (count === 0) return null;
             return (
               <div 
                 key={`stat-${rank}`}
