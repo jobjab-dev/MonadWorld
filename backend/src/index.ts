@@ -21,6 +21,7 @@ console.log('PORT (from .env.local via process.env):', process.env.PORT);
 console.log('RPC_URL (from .env.local via process.env for provider):', process.env.RPC_URL);
 console.log('INDEXER_START_BLOCK (from .env.local via process.env):', process.env.INDEXER_START_BLOCK);
 console.log('FRONTEND_BASE_URL (from .env.local via process.env):', process.env.FRONTEND_BASE_URL);
+console.log('BACKEND_PUBLIC_URL (from .env.local via process.env for constructing metadata URIs):', process.env.BACKEND_PUBLIC_URL);
 console.log('---------------------------------------------------');
 
 const app = express();
@@ -105,6 +106,48 @@ const gameInterface = new ethers.utils.Interface([
   'function sbtInfo(uint256) view returns (uint256 startTimestamp,uint256 collected,bool isDead,uint8 rank)'
 ]);
 
+// Solidity constant from contract (for backend calculation)
+const ACCRUAL_WINDOW_SECS_CONTRACT = 72 * 60 * 60; // 72 hours in seconds
+
+function calculateCollectableForBackend(
+  sbtInfoRaw: SbtInfoResultType, 
+  rankDataEntry: RankDataCacheEntry, 
+  currentTimestamp: number,
+  isActuallyDead: boolean // Pass the pre-calculated isActuallyDead
+): BigNumber { // Return ethers.BigNumber for consistency with other contract values initially
+  if (isActuallyDead) return ethers.BigNumber.from(0); // If already determined dead, nothing to collect
+
+  // Convert string values from cache/sbtInfoRaw to BigNumber/Number for calculation
+  const startTimestamp = sbtInfoRaw.startTimestamp.toNumber(); // Assuming BigNumber from ethers
+  const lastCollect = sbtInfoRaw.lastCollect.toNumber();
+  const collected = sbtInfoRaw.collected; // This is already ethers.BigNumber
+  const S_val = ethers.BigNumber.from(rankDataEntry.S); // S from cache is string
+  const T_val = parseInt(rankDataEntry.T, 10); // T from cache is string, parse to number
+
+  if (T_val === 0) { 
+      const remainingToCollect = S_val.sub(collected);
+      return remainingToCollect.gt(0) ? remainingToCollect : ethers.BigNumber.from(0);
+  }
+  
+  // Note: isActuallyDead check above should cover this, but keeping for robustness
+  const elapsedSinceStart = currentTimestamp - startTimestamp;
+  if (elapsedSinceStart >= T_val) {
+      return ethers.BigNumber.from(0);
+  }
+
+  const timeSinceLast = currentTimestamp - lastCollect;
+  const effectiveWindow = Math.min(timeSinceLast, ACCRUAL_WINDOW_SECS_CONTRACT);
+  if (effectiveWindow <= 0) return ethers.BigNumber.from(0);
+
+  // Perform calculations using ethers.BigNumber methods for precision
+  // potential = (S * effectiveWindow) / T
+  const potential = S_val.mul(effectiveWindow).div(T_val);
+  const remainingOverall = S_val.sub(collected);
+  
+  const toCollect = potential.gt(remainingOverall) ? remainingOverall : potential;
+  return toCollect.gt(0) ? toCollect : ethers.BigNumber.from(0);
+}
+
 // API: get leaderboard latest snapshot
 app.get('/leaderboard', async (req, res) => {
   const snaps = await prisma.snapshot.findMany({
@@ -118,7 +161,7 @@ app.get('/leaderboard', async (req, res) => {
 app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
   const { ownerAddress } = req.params;
   const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 20; // Default limit to 20, adjust as needed
+  const limit = parseInt(req.query.limit as string, 10) || 20;
   const skip = (page - 1) * limit;
 
   if (!ownerAddress || !/^0x[a-fA-F0-9]{40}$/.test(ownerAddress)) {
@@ -130,12 +173,10 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
     return res.status(500).json({ error: 'NFT Contract not initialized on backend. Check server logs.' });
   }
 
-  // Ensure RankData cache is warm
   if (!isRankDataCacheInitialized) {
     await initializeRankDataCache();
-    if (!isRankDataCacheInitialized) { // Check again after attempt
-        // If still not initialized, we might have to proceed without it or error out
-        console.warn('RankData cache could not be initialized. Proceeding without it for this request, rankData might be missing for NFTs.');
+    if (!isRankDataCacheInitialized) {
+        console.warn('RankData cache still not initialized after attempt for request.');
     }
   }
 
@@ -147,20 +188,22 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
 
     const nftsFromDb = await prisma.lilnadNft.findMany({
       where: { ownerAddress: ownerAddress },
-      select: { tokenId: true, rank: true, metadataUri: true },
-      orderBy: { tokenId: 'asc' }, // Consider if a different order is better for pagination (e.g., mintTimestamp)
+      select: { tokenId: true, rank: true },
+      orderBy: [
+        { rank: 'asc' },      // Primary sort: Rank 0 (UR) comes first
+        { tokenId: 'asc' }   // Secondary sort: Lower token IDs first if ranks are same
+      ],
       skip: skip,
       take: limit,
     });
 
-    if (nftsFromDb.length === 0 && totalNfts > 0 && page > 1) { // Page requested is out of bounds
+    if (nftsFromDb.length === 0 && page > 1) {
         return res.json({ data: [], currentPage: page, totalPages: Math.ceil(totalNfts / limit), totalItems: totalNfts, message: "Page out of bounds" });
     }
     
     const currentServerTimestamp = Math.floor(Date.now() / 1000);
 
-    // Parallelize sbtInfo calls
-    const sbtInfoPromises = nftsFromDb.map(nftDb => 
+    const sbtInfoPromises = nftsFromDb.map(nftDb =>
       lilnadNftContract!.sbtInfo(ethers.BigNumber.from(nftDb.tokenId))
         .then((sbtInfoRaw: SbtInfoResultType) => ({ tokenId: nftDb.tokenId, sbtInfoRaw, error: null }))
         .catch((err: Error) => ({ tokenId: nftDb.tokenId, sbtInfoRaw: null, error: err }))
@@ -168,71 +211,69 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
     const sbtInfoResults = await Promise.all(sbtInfoPromises);
     const sbtInfoMap = new Map(sbtInfoResults.map(r => [r.tokenId, {raw: r.sbtInfoRaw, error: r.error}]));
 
-    const enhancedNfts = []; // Initialize as an empty array
-    for (const nftDb of nftsFromDb) { // Use a for...of loop
+    const backendBaseUrl = process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const enhancedNfts = [];
+
+    for (const nftDb of nftsFromDb) {
       const sbtInfoFetchResult = sbtInfoMap.get(nftDb.tokenId);
       const sbtInfoResultRaw = sbtInfoFetchResult?.raw;
       const fetchError = sbtInfoFetchResult?.error;
       
-      let sbtInfoData = null;
-      let rankDataResult: RankDataCacheEntry | undefined | null = null;
-      let errorFetchingOnChain = false;
-      let specificErrorMessage = 'Unknown error';
+      let sbtInfoDataForClient = null;
+      const cachedRankDataEntry = rankDataCache.get(nftDb.rank);
+      let rankDataForClient: RankDataCacheEntry | null = cachedRankDataEntry !== undefined ? cachedRankDataEntry : null;
+      
+      let calculatedDataForClient = {
+          isActuallyDead: true, 
+          collectableNow: "0",
+          totalAccrued: "0"
+      };
+      let errorFetchingOnChain = !!fetchError;
+      let specificErrorMessage = fetchError ? (fetchError.message || 'Error fetching sbtInfo') : undefined;
 
-      try {
-        const tokenIdBigNumber = ethers.BigNumber.from(nftDb.tokenId);
-        const rankUint8: number = nftDb.rank;
-
-        if (typeof rankUint8 !== 'number' || rankUint8 < 0 || rankUint8 > 255) {
-            throw new Error(`Invalid rank value: ${rankUint8}`);
-        }
-
-        rankDataResult = rankDataCache.get(rankUint8); // Get from cache
-
-        if (!rankDataResult && isRankDataCacheInitialized) {
-            // This case means rank is valid (0-255) but not found in cache (0-5), which is an issue.
-            // Or cache wasn't initialized properly for this rank.
-            console.warn(`RankData for rank ${rankUint8} not found in cache. Attempting direct fetch (fallback).`);
-            // Fallback: try to fetch directly if missing from cache, though ideally cache should be complete.
-            const rdDirect = await lilnadNftContract.rankData(rankUint8);
-            rankDataResult = { S: rdDirect.S.toString(), T: rdDirect.T.toString() };
-            // Optionally add to cache here if deemed safe
-            // rankDataCache.set(rankUint8, rankDataResult);
-        } else if (!rankDataResult && !isRankDataCacheInitialized){
-            console.warn(`RankData cache not initialized, and no data for rank ${rankUint8}. RankData will be null.`);
-            // rankDataResult remains null
-        }
-        
-        let isActuallyDead = sbtInfoResultRaw.isDead;
-        if (rankDataResult && rankDataResult.T && Number(rankDataResult.T) > 0) {
-            const lifetime = Number(rankDataResult.T);
-            const startTime = Number(sbtInfoResultRaw.startTimestamp.toString());
+      if (sbtInfoResultRaw) {
+        let isActuallyDeadCalc = sbtInfoResultRaw.isDead;
+        if (rankDataForClient && rankDataForClient.T && Number(rankDataForClient.T) > 0) {
+            const lifetime = Number(rankDataForClient.T);
+            const startTime = sbtInfoResultRaw.startTimestamp.toNumber();
             if (currentServerTimestamp >= startTime + lifetime) {
-                isActuallyDead = true;
+                isActuallyDeadCalc = true;
             }
         }
+        
+        let collectableNowBigNum = ethers.BigNumber.from(0);
+        if (rankDataForClient) { 
+            collectableNowBigNum = calculateCollectableForBackend(sbtInfoResultRaw, rankDataForClient, currentServerTimestamp, isActuallyDeadCalc);
+        }
+        
+        const totalAccruedBigNum = sbtInfoResultRaw.collected.add(collectableNowBigNum);
 
-        sbtInfoData = {
+        sbtInfoDataForClient = {
             startTimestamp: sbtInfoResultRaw.startTimestamp.toString(),
             lastCollect: sbtInfoResultRaw.lastCollect.toString(),
             collected: sbtInfoResultRaw.collected.toString(),
-            isDead: isActuallyDead, // Use the re-calculated isDead
+            isDead: sbtInfoResultRaw.isDead, 
         };
-
-      } catch (contractError: any) {
-        console.error(`Error fetching on-chain data for tokenId ${nftDb.tokenId} (rank ${nftDb.rank}):`, contractError.message);
-        errorFetchingOnChain = true;
-        specificErrorMessage = contractError.message;
+        calculatedDataForClient = {
+            isActuallyDead: isActuallyDeadCalc,
+            collectableNow: collectableNowBigNum.toString(),
+            totalAccrued: totalAccruedBigNum.toString()
+        };
+      } else if(fetchError && !rankDataForClient) { 
+        const fallbackRankData = rankDataCache.get(nftDb.rank);
+        rankDataForClient = fallbackRankData !== undefined ? fallbackRankData : null;
       }
-      
-      enhancedNfts.push({ // Push to the array
+
+      const constructedMetadataUri = `${backendBaseUrl}/api/metadata/lilnad/${nftDb.tokenId}`;
+      enhancedNfts.push({
         tokenId: nftDb.tokenId,
         rank: nftDb.rank,
-        metadataUriFromIndexer: nftDb.metadataUri,
-        sbtInfo: sbtInfoData,
-        rankData: rankDataResult, // This could be null if cache failed and direct fetch also failed
+        metadataUri: constructedMetadataUri,
+        sbtInfo: sbtInfoDataForClient,
+        rankData: rankDataForClient,  
+        calculated: calculatedDataForClient,
         errorFetchingOnChainData: errorFetchingOnChain,
-        errorMessage: errorFetchingOnChain ? specificErrorMessage : undefined,
+        errorMessage: specificErrorMessage,
       });
     }
 

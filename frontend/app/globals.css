@@ -1,26 +1,557 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  body {
+    /* Pixel font family is set via CSS variable in RootLayout using Pixelify Sans */
+    background-color: #301934; /* pixel-bg */
+    color: #E6E6FA;            /* pixel-text */
+    min-height: 100vh;
+    @apply antialiased;
+    font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif;
+    image-rendering: pixelated;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  a {
+    color: #8A2BE2; /* pixel-purple-medium */
+  }
+  a:hover {
+    color: #D8BFD8; /* pixel-purple-light */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* PIXEL STYLE GLOBAL */
+
+/* พื้นหลังหน้าเพจ - เพิ่มลายดอทแบบ pixel */
+body:after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(#8A2BE2 1px, transparent 1px),
+    radial-gradient(#8A2BE2 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 25px 25px;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* NAVBAR STYLING */
+.MonadWorld, .Home, .Mint, .Collect, .Leaderboard {
+  color: #F0E68C !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+}
+
+/* TITLE STYLING */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-pixelify-sans), monospace !important;
+  text-shadow: 3px 3px 0 #000 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+/* My Lilnad NFTs title */
+h1 {
+  color: #F0E68C !important;
+  font-size: 2.5rem !important;
+  text-align: center !important;
+  margin: 30px auto !important;
+  padding: 10px 20px !important;
+  background-color: #4B0082 !important;
+  box-shadow: 8px 8px 0 #000 !important;
+  border: 4px solid #8A2BE2 !important;
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important;
+  border-right-color: #6A1B9A !important;
+  border-bottom-color: #6A1B9A !important;
+  display: inline-block !important;
+  position: relative !important;
+}
+
+h1:before {
+  content: '';
+  position: absolute;
+  height: 4px;
+  width: 4px;
+  background: #F0E68C;
+  top: 8px;
+  left: 8px;
+}
+
+h1:after {
+  content: '';
+  position: absolute;
+  height: 4px;
+  width: 4px;
+  background: #F0E68C;
+  bottom: 8px;
+  right: 8px;
+}
+
+/* PAGINATION STYLING */
+button, 
+[type="button"] {
+  background-color: #8A2BE2 !important;
+  color: #F0E68C !important;
+  border: none !important;
+  font-weight: bold !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  text-transform: uppercase !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  letter-spacing: 2px !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+  margin: 5px 10px !important;
+}
+
+button:hover, 
+[type="button"]:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+/* GRID STYLING FOR NFT DISPLAY */
+.grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 30px !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 20px auto !important;
+}
+
+/* CUSTOM TABLE STYLING */
+table {
+  border-spacing: 30px !important;
+  border-collapse: separate !important;
+  width: 95% !important;
+  max-width: 1200px !important;
+  margin: 20px auto !important;
+}
+
+/* Make sure TD cells have spacing */
+td {
+  padding: 15px !important;
+  vertical-align: top !important;
+}
+
+/* NFT CARD STYLING - GENERAL CONTAINER */
+.grid > div,
+td > div {
+  border: 4px solid #9C27B0 !important;
+  background-color: #301934 !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  overflow: hidden !important;
+  transition: all 0.1s ease-in-out !important;
+  max-width: 220px !important;
+  width: 100% !important;
+  position: relative !important;
+  transform: scale(1) !important;
+  
+  /* Pixel-style borders */
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important;
+  border-right-color: #6A1B9A !important;
+  border-bottom-color: #6A1B9A !important;
+}
+
+/* NFT CARD HOVER EFFECT */
+.grid > div:hover,
+td > div:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 9px 9px 0 #000 !important;
+}
+
+/* NFT CARD TITLE */
+.grid > div > div:first-child,
+td > div > div:first-child {
+  background-color: #8A2BE2 !important;
+  color: #F0E68C !important;
+  padding: 8px !important;
+  font-size: 1.1rem !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  border-bottom: 4px solid #BA68C8 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  letter-spacing: 1px !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+}
+
+/* NFT CARD IMAGE */
+.grid > div > img,
+td > div > img {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  image-rendering: pixelated !important;
+  border-bottom: 4px solid #9C27B0 !important;
+}
+
+/* NFT DATA SECTIONS */
+.grid > div > div:not(:first-child),
+td > div > div:not(:first-child) {
+  padding: 6px 8px !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  line-height: 1.3 !important;
+  font-size: 0.9rem !important;
+  position: relative !important;
+}
+
+/* STYLE DATA ROWS WITH ALTERNATING BACKGROUNDS */
+.grid > div > div:nth-child(odd):not(:first-child),
+td > div > div:nth-child(odd):not(:first-child) {
+  background-color: rgba(138, 43, 226, 0.1) !important;
+}
+
+/* MAKE DATA LABELS BOLD AND COLORED */
+.grid > div > div:nth-child(n+2):nth-child(-n+5),
+td > div > div:nth-child(n+2):nth-child(-n+5) {
+  color: #F0E68C !important;
+  font-weight: bold !important;
+}
+
+/* HIDE METADATA, LAST COLLECT, MINTED INFO - MORE SPECIFIC */
+.grid > div > div:nth-child(n+5),  /* Hide 5th div and onwards in grid layout */
+td > div > div:nth-child(n+5),     /* Hide 5th div and onwards in table layout */
+div:has(> span:contains("Last Collect")),
+div:has(> span:contains("Minted")),
+div:has(> span:contains("Metadata")) {
+  display: none !important;
+}
+
+/* COLLECT BUTTON STYLING */
+.grid > div > button,
+td > div > button {
+  background-color: #F0E68C !important;
+  color: #301934 !important;
+  border: none !important;
+  font-weight: bold !important;
+  width: 100% !important;
+  padding: 8px 0 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.1s !important;
+  font-family: var(--font-pixelify-sans), monospace !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3) !important;
+  position: relative !important;
+  font-size: 1.1rem !important; /* Increased font size */
+  
+  /* Pixel style inset shadow */
+  box-shadow: 
+    inset 0 4px 0 #FFF8DC, 
+    inset 0 -4px 0 #DAA520 !important;
+}
+
+/* COLLECT BUTTON HOVER */
+.grid > div > button:hover,
+td > div > button:hover {
+  background-color: #DAA520 !important;
+  color: white !important;
+  box-shadow: 
+    inset 0 4px 0 #F0E68C, 
+    inset 0 -4px 0 #B8860B !important;
+  transform: translateY(2px) !important;
+}
+
+/* PIXEL CORNER DECORATIONS */
+.grid > div:before,
+td > div:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 4px !important;
+  left: 4px !important;
+  width: 4px !important;
+  height: 4px !important;
+  background: #F0E68C !important;
+  z-index: 5 !important;
+}
+
+.grid > div:after,
+td > div:after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 4px !important;
+  right: 4px !important;
+  width: 4px !important;
+  height: 4px !important;
+  background: #F0E68C !important;
+  z-index: 5 !important;
+}
+
+/* Fix any weird floating issues */
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* ซ่อนข้อมูล Last Collect, Minted และ Metadata - SELECTOR ที่แม่นยำ */
+td > div > div:nth-child(6),
+td > div > div:nth-child(7),
+td > div > div:nth-child(8) {
+  display: none !important;
+}
+
+/* วิธีซ่อนข้อมูลตามข้อความ - อาจทำงานใน development แต่อาจมีปัญหาใน production */
+div:has(> span:contains("Last Collect")),
+div:has(> span:contains("Minted")),
+div:has(> span:contains("Metadata")) {
+  display: none !important;
+}
+
+/* วิธีซ่อนตามเนื้อหาเริ่มต้น - แก้ปัญหาแบบเฉพาะหน้า */
+div:has(> span:first-child:contains("Last")),
+div:has(> span:first-child:contains("Minted")),
+div:has(> a[href*="localhost"]),
+div:has(> a[href*="http://local"]) {
+  display: none !important;
+}
+
+/* -------[ ปุ่ม COLLECT SCORE แบบใหม่ SIMPLIFIED ]------- */
+td > div > button,
+.grid > div > button {
+  /* พื้นฐาน */
+  width: 100% !important;
+  padding: 10px 0 !important;
+  margin-top: 5px !important;
+  
+  /* สไตล์ */
+  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
+  border: 3px solid #8B4513 !important;
+  border-radius: 2px !important;
+  
+  /* ข้อความ */
+  color: #000000 !important;
+  font-family: 'VT323', monospace !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0px #FFFFFF !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  
+  /* เอฟเฟกต์ */
+  box-shadow: 0px 4px 0px #5c3c0d !important;
+  position: relative !important;
+  transition: all 0.1s !important;
+  transform: translateY(0) !important;
+  cursor: pointer !important;
+}
+
+/* hover */
+td > div > button:hover,
+.grid > div > button:hover {
+  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0px 6px 0px #5c3c0d !important;
+}
+
+/* active */
+td > div > button:active,
+.grid > div > button:active {
+  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
+  transform: translateY(2px) !important;
+  box-shadow: 0px 2px 0px #5c3c0d !important;
+}
+
+/* ซ่อนข้อมูล Last Collect, Minted, Metadata - ตรงตาม SbtCard Component */
+.space-y-1 > p:nth-child(4),
+.space-y-1 > p:nth-child(5),
+.space-y-1 > p:nth-child(6),
+.space-y-1 > p.text-xs.text-gray-400,
+.space-y-1 > p.text-xs.text-gray-500 {
+  display: none !important;
+}
+
+/* เฉพาะเจาะจงกับข้อความใน Last Collect, Minted และ Metadata */
+p:has(> span.font-medium:contains("Last Collect")),
+p:has(> span.font-medium:contains("Minted")), 
+p:has(> span.font-medium:contains("Metadata")) {
+  display: none !important;
+}
+
+/* สำหรับ Production Build (ไม่สนับสนุน :has และ :contains) */
+.text-xs.text-gray-400,
+.text-xs.text-gray-500.truncate {
+  display: none !important;
+}
+
+/* -------[ ปุ่ม COLLECT SCORE แบบใหม่ ]------- */
+button[onClick="handleCollect"],
+.w-full.px-4.py-2.bg-pixel-accent,
+button:has(+ p.text-xs.text-gray-400) {
+  /* พื้นฐาน */
+  width: 100% !important;
+  padding: 10px 0 !important;
+  margin-top: 5px !important;
+  
+  /* สไตล์ */
+  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
+  border: 3px solid #8B4513 !important;
+  border-radius: 0 !important;
+  
+  /* ข้อความ */
+  color: #000000 !important;
+  font-family: 'VT323', monospace !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0px #FFFFFF, -1px -1px 0px rgba(0,0,0,0.3) !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  
+  /* เอฟเฟกต์ */
+  box-shadow: 0px 4px 0px #5c3c0d !important;
+  position: relative !important;
+  transition: all 0.1s !important;
+  transform: translateY(0) !important;
+  cursor: pointer !important;
+}
+
+/* hover */
+button[onClick="handleCollect"]:hover,
+.w-full.px-4.py-2.bg-pixel-accent:hover,
+button:has(+ p.text-xs.text-gray-400):hover {
+  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0px 6px 0px #5c3c0d !important;
+}
+
+/* active */
+button[onClick="handleCollect"]:active,
+.w-full.px-4.py-2.bg-pixel-accent:active,
+button:has(+ p.text-xs.text-gray-400):active {
+  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
+  transform: translateY(2px) !important;
+  box-shadow: 0px 2px 0px #5c3c0d !important;
+}
+
+/* CSS Selector แบบง่ายที่สุดที่ควรทำงานได้ทุกกรณี */
+.p-3.space-y-1.flex-grow.bg-gray-800 > p:nth-child(n+4) {
+  display: none !important;
+}
+
+/* Collect BUTTON - simplest selector */
+.w-full.px-4.py-2 {
+  background: linear-gradient(to bottom, gold, darkgoldenrod) !important;
+  color: black !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px white !important;
+  box-shadow: 0 4px 0 #5a3805 !important;
+  border: 0 !important;
+  transition: all 0.1s !important;
+}
+
+.w-full.px-4.py-2:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 0 #5a3805 !important;
+}
+
+.w-full.px-4.py-2:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 #5a3805 !important;
+}
+
+/* ปรับปรุงปุ่ม COLLECT ให้ตรงและสวยงาม */
+.w-full.px-4.py-2, button.w-full {
+  width: 100% !important;
+  margin: 0 !important; /* ลบ margin ทั้งหมด */
+  padding: 12px 0 !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
+  color: black !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0 #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 0 !important; /* ลบ border radius */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 0 #5a3805 !important;
+  transition: all 0.1s !important;
+  font-family: 'VT323', 'Press Start 2P', monospace !important;
+  letter-spacing: 1px !important;
+}
+
+.w-full.px-4.py-2:hover, button.w-full:hover {
+  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 0 #5a3805 !important;
+}
+
+.w-full.px-4.py-2:active, button.w-full:active {
+  transform: translateY(2px) !important;
+  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 0 #5a3805 !important;
+}
+
+/* NAVBAR STYLING - PIXEL ART STYLE */
+nav, .navbar, header, .header, .fixed {
+  background-color: #4B0082 !important;
+  border-bottom: 4px solid #9C27B0 !important;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.7) !important;
+  padding: 0.75rem !important;
+  image-rendering: pixelated !important;
+}
+
+/* Menu Items ใน Navbar */
+nav a, .navbar a, header a, .header a, .fixed a,
+.MonadWorld, .Home, .Mint, .Collect, .Leaderboard {
+  color: #F0E68C !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  padding: 8px 16px !important;
+  border: 2px solid transparent !important;
+  transition: all 0.1s !important;
+  margin: 0 3px !important;
+}
+
+/* Menu Items Hover Effect */
+nav a:hover, .navbar a:hover, header a:hover, .header a:hover, .fixed a:hover,
+.MonadWorld:hover, .Home:hover, .Mint:hover, .Collect:hover, .Leaderboard:hover {
+  background-color: #8A2BE2 !important;
+  border: 2px solid #BA68C8 !important;
+  border-right-color: #4A148C !important;
+  border-bottom-color: #4A148C !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7) !important;
+}
+
+/* Active Menu Item */
+nav a.active, .navbar a.active, header a.active, .header a.active, .fixed a.active,
+.Collect.active {
+  background-color: #9C27B0 !important;
+  border: 2px solid #BA68C8 !important;
+  border-right-color: #4A148C !important;
+  border-bottom-color: #4A148C !important;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3) !important;
+}
+
+/* เพิ่มเอฟเฟกต์ดอทพิกเซลบน Navbar */
+nav:before, .navbar:before, header:before, .header:before, .fixed:before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: 
+    linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%) !important;
+  background-size: 4px 4px !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
 }
