@@ -8,8 +8,16 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-const EVENT_NAME_TO_WATCH = 'RevealAndMint';
+// Add Transfer event definition to track ownership changes
+const EVENT_REVEAL_AND_MINT = 'RevealAndMint';
+const EVENT_TRANSFER = 'Transfer';
+
 const REVEAL_EVENT_ABI_ITEM = parseAbiItem('event RevealAndMint(address indexed user, uint256 indexed tokenId, uint8 rank, string uri)') as AbiEvent;
+const TRANSFER_EVENT_ABI_ITEM = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)') as AbiEvent;
+
+// Calculate the event signatures (topics[0]) hash for comparison
+const REVEAL_EVENT_SIGNATURE = '0x0fe979440580532b621e6c051114b9fb70153abf461fb807b9812ae5b7c86cc2';
+const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'; // ERC721 Transfer event signature
 
 // Simpler Log type for broader compatibility (use unknown[] for ABI)
 type GenericLog = Log<bigint, number, false, undefined, true, unknown[]>;
@@ -20,10 +28,21 @@ type RevealEventArgs = {
     rank: number;
     uri: string;
 };
+type TransferEventArgs = {
+    from: Hex;
+    to: Hex;
+    tokenId: bigint;
+};
 
 let isCatchingUp = false;
+// Keep track of the last processed block to avoid gaps in event processing
+let lastProcessedBlock: bigint | null = null;
+// Polling interval in milliseconds (5 seconds)
+const POLLING_INTERVAL = 5000;
+// Batch size for fetching logs (adjusted to meet RPC limit of 100)
+const BATCH_SIZE = BigInt(90); // Use 90 to be safe
 
-async function processLog(log: GenericLog) { // Use GenericLog
+async function processRevealAndMintLog(log: GenericLog) {
   try {
     // Decode explicitly here as the generic Log type doesn't guarantee decoded args
     const decoded = decodeEventLog({ 
@@ -31,8 +50,6 @@ async function processLog(log: GenericLog) { // Use GenericLog
         data: log.data,
         topics: log.topics
     });
-
-    if (decoded.eventName !== EVENT_NAME_TO_WATCH) return;
 
     const args = decoded.args as RevealEventArgs;
     const tokenIdStr = args.tokenId.toString();
@@ -70,22 +87,75 @@ async function processLog(log: GenericLog) { // Use GenericLog
        },
     });
   } catch (error) {
+    console.error(`Error processing RevealAndMint log (tx: ${log.transactionHash}, index: ${log.logIndex}):`, error);
+  }
+}
+
+// Add function to process Transfer events
+async function processTransferLog(log: GenericLog) {
+  try {
+    // Decode explicitly here
+    const decoded = decodeEventLog({ 
+        abi: [TRANSFER_EVENT_ABI_ITEM],
+        data: log.data,
+        topics: log.topics
+    });
+
+    const args = decoded.args as TransferEventArgs;
+    const tokenIdStr = args.tokenId.toString();
+    const currentContractAddress = LILNAD_NFT_CONTRACT_ADDRESS;
+
+    console.log(`Processing ${decoded.eventName}: From=${args.from}, To=${args.to}, TokenID=${tokenIdStr}, Contract=${currentContractAddress}, Block=${log.blockNumber}`);
+
+    // Update the owner address in the database
+    await prisma.lilnadNft.updateMany({
+      where: { 
+        contractAddress: currentContractAddress,
+        tokenId: tokenIdStr
+      },
+      data: { 
+        ownerAddress: args.to
+      }
+    });
+  } catch (error) {
+    console.error(`Error processing Transfer log (tx: ${log.transactionHash}, index: ${log.logIndex}):`, error);
+  }
+}
+
+async function processLog(log: GenericLog) {
+  try {
+    // First, try to determine the event type from the first topic (event signature)
+    const eventSignature = log.topics[0];
+    
+    // Check if it's a RevealAndMint event
+    if (eventSignature === REVEAL_EVENT_SIGNATURE) {
+      await processRevealAndMintLog(log);
+    }
+    // Check if it's a Transfer event
+    else if (eventSignature === TRANSFER_EVENT_SIGNATURE) {
+      await processTransferLog(log);
+    }
+    // If we can't determine the event type, skip it
+    else {
+      console.log(`Unknown event signature: ${eventSignature}`);
+    }
+  } catch (error) {
     console.error(`Error processing log (tx: ${log.transactionHash}, index: ${log.logIndex}):`, error);
   }
 }
 
-async function getLogsBatch(fromBlock: bigint, toBlock: bigint): Promise<GenericLog[]> { // Use GenericLog
-    console.log(`Fetching logs from ${fromBlock} to ${toBlock}`);
+async function getLogsBatch(fromBlock: bigint, toBlock: bigint, eventAbiItem: AbiEvent): Promise<GenericLog[]> {
+    console.log(`Fetching ${eventAbiItem.name} logs from ${fromBlock} to ${toBlock}`);
     try {
         const logs = await publicClient.getLogs({
             address: LILNAD_NFT_CONTRACT_ADDRESS,
-            event: REVEAL_EVENT_ABI_ITEM, // Use the specific parsed ABI item
+            event: eventAbiItem,
             fromBlock: fromBlock,
             toBlock: toBlock,
         });
-        return logs as GenericLog[]; // Cast to the simpler log type
+        return logs as GenericLog[];
     } catch(err) {
-        console.error(`Error fetching logs in range ${fromBlock}-${toBlock}:`, err);
+        console.error(`Error fetching ${eventAbiItem.name} logs in range ${fromBlock}-${toBlock}:`, err);
         return [];
     }
 }
@@ -103,21 +173,34 @@ async function catchUpOnLogs() {
     let currentBlock = await publicClient.getBlockNumber();
     console.log(`Catch-up range: ${fromBlock} to ${currentBlock}`);
 
-    const batchSize = BigInt(99); // Adjusted to meet RPC limit (100 range)
-
     while (fromBlock <= currentBlock) {
-      const toBlock = (fromBlock + batchSize - BigInt(1)) > currentBlock ? currentBlock : (fromBlock + batchSize - BigInt(1));
-      const logs = await getLogsBatch(fromBlock, toBlock);
+      const toBlock = (fromBlock + BATCH_SIZE - BigInt(1)) > currentBlock ? currentBlock : (fromBlock + BATCH_SIZE - BigInt(1));
       
-      if (logs.length > 0) {
-        console.log(`Processing ${logs.length} logs from block ${fromBlock} to ${toBlock}`);
-        for (const log of logs) {
-          await processLog(log);
+      // Get RevealAndMint events
+      const revealLogs = await getLogsBatch(fromBlock, toBlock, REVEAL_EVENT_ABI_ITEM);
+      if (revealLogs.length > 0) {
+        console.log(`Processing ${revealLogs.length} RevealAndMint logs from block ${fromBlock} to ${toBlock}`);
+        for (const log of revealLogs) {
+          await processRevealAndMintLog(log);
         }
       }
+      
+      // Get Transfer events
+      const transferLogs = await getLogsBatch(fromBlock, toBlock, TRANSFER_EVENT_ABI_ITEM);
+      if (transferLogs.length > 0) {
+        console.log(`Processing ${transferLogs.length} Transfer logs from block ${fromBlock} to ${toBlock}`);
+        for (const log of transferLogs) {
+          await processTransferLog(log);
+        }
+      }
+      
       console.log(`Finished batch up to block ${toBlock}.`);
       fromBlock = toBlock + BigInt(1);
     }
+    
+    // Update the last processed block
+    lastProcessedBlock = currentBlock;
+    
     console.log("Historical log catch-up finished.");
   } catch (error) {
     console.error("Error during historical log catch-up:", error);
@@ -126,27 +209,74 @@ async function catchUpOnLogs() {
   }
 }
 
+// New function to poll for new events
+async function pollForNewEvents() {
+  try {
+    if (isCatchingUp) {
+      console.log("Skipping poll because catch-up is running");
+      return;
+    }
+    
+    const currentBlock = await publicClient.getBlockNumber();
+    
+    // If we haven't processed any blocks yet, initialize with current block
+    if (lastProcessedBlock === null) {
+      lastProcessedBlock = currentBlock;
+      console.log(`Initialized last processed block to ${lastProcessedBlock}`);
+      return;
+    }
+    
+    // If there are new blocks to process
+    if (currentBlock > lastProcessedBlock) {
+      console.log(`Polling for new events from block ${lastProcessedBlock + BigInt(1)} to ${currentBlock}`);
+      
+      let fromBlock = lastProcessedBlock + BigInt(1);
+      
+      while (fromBlock <= currentBlock) {
+        const toBlock = (fromBlock + BATCH_SIZE - BigInt(1)) > currentBlock ? currentBlock : (fromBlock + BATCH_SIZE - BigInt(1));
+        
+        // Get RevealAndMint events
+        const revealLogs = await getLogsBatch(fromBlock, toBlock, REVEAL_EVENT_ABI_ITEM);
+        if (revealLogs.length > 0) {
+          console.log(`Processing ${revealLogs.length} new RevealAndMint logs`);
+          for (const log of revealLogs) {
+            await processRevealAndMintLog(log);
+          }
+        }
+        
+        // Get Transfer events
+        const transferLogs = await getLogsBatch(fromBlock, toBlock, TRANSFER_EVENT_ABI_ITEM);
+        if (transferLogs.length > 0) {
+          console.log(`Processing ${transferLogs.length} new Transfer logs`);
+          for (const log of transferLogs) {
+            await processTransferLog(log);
+          }
+        }
+        
+        fromBlock = toBlock + BigInt(1);
+      }
+      
+      // Update the last processed block
+      lastProcessedBlock = currentBlock;
+      console.log(`Updated last processed block to ${lastProcessedBlock}`);
+    } else {
+      console.log(`No new blocks since ${lastProcessedBlock}`);
+    }
+  } catch (error) {
+    console.error("Error during event polling:", error);
+  }
+}
+
 export function startIndexer() {
   console.log("Starting Indexer: Catching up on historical logs first...");
 
+  // First, catch up on historical logs
   catchUpOnLogs().then(() => {
-    console.log("Starting real-time event watcher...");
-    publicClient.watchContractEvent({
-      address: LILNAD_NFT_CONTRACT_ADDRESS,
-      abi: LILNAD_NFT_ABI, // Use full ABI
-      eventName: EVENT_NAME_TO_WATCH,
-      // MODIFIED: Use generic Log[] type for onLogs
-      onLogs: (logs: Log[]) => { 
-        console.log(`Received ${logs.length} new log(s)`);
-        // Explicitly decode each log inside the loop
-        logs.forEach(async (log) => { 
-            await processLog(log as GenericLog);
-        });
-      },
-      onError: (error: Error) => { 
-          console.error("Error watching contract events:", error);
-      }
-    });
-    console.log(`Indexer watching for ${EVENT_NAME_TO_WATCH} events on ${LILNAD_NFT_CONTRACT_ADDRESS}`);
+    console.log("Starting real-time event polling...");
+    
+    // Set up polling interval
+    setInterval(pollForNewEvents, POLLING_INTERVAL);
+    
+    console.log(`Indexer polling for ${EVENT_REVEAL_AND_MINT} and ${EVENT_TRANSFER} events every ${POLLING_INTERVAL/1000} seconds`);
   });
 }
