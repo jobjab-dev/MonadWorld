@@ -479,6 +479,62 @@ app.get('/api/metadata/lilnad/:tokenId', async (req, res) => {
   }
 });
 
+// Simpler API Endpoint to get single NFT data
+app.get('/api/nft/:tokenId', async (req, res) => {
+  const { tokenId } = req.params;
+  const numericTokenId = parseInt(tokenId, 10);
+
+  if (isNaN(numericTokenId)) {
+    return res.status(400).json({ error: 'Token ID must be a number.' });
+  }
+
+  try {
+    const currentContractAddress = LILNAD_NFT_CONTRACT_ADDRESS.toLowerCase();
+
+    const nft = await prisma.lilnadNft.findUnique({
+      where: {
+        contractAddress_tokenId: {
+          contractAddress: currentContractAddress,
+          tokenId: tokenId 
+        }
+      },
+    });
+
+    if (!nft) {
+      return res.status(404).json({ error: 'NFT not found.' });
+    }
+
+    // Calculate current score and status
+    const nowS = Math.floor(Date.now() / 1000);
+    const nftForScore = {
+      mintTimestamp: nft.mintTimestamp,
+      rank: nft.rank,
+      expirationTimestamp: nft.expirationTimestamp,
+    };
+    const collectableNow = calculateNftScore(nftForScore, nowS, rankDataCache);
+
+    const response = {
+      tokenId: nft.tokenId,
+      rank: nft.rank,
+      startTimestamp: Math.floor(nft.mintTimestamp.getTime() / 1000),
+      expirationTimestamp: nft.expirationTimestamp
+        ? Math.floor(nft.expirationTimestamp.getTime() / 1000)
+        : 0,
+      scorePerSecond: nft.scorePerSecond.toString(),
+      collectableNow: collectableNow.toString(),
+      isDead: nft.expirationTimestamp
+        ? nowS >= Math.floor(nft.expirationTimestamp.getTime() / 1000)
+        : false,
+      ownerAddress: nft.ownerAddress
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error(`Error fetching NFT data for tokenId ${tokenId}:`, error);
+    res.status(500).json({ error: 'Failed to fetch NFT data.' });
+  }
+});
+
 // New: Blacklist management endpoints
 app.post('/api/blacklist', adminAuth, async (req, res) => {
   const { targetAddress } = req.body;  // เปลี่ยนจาก address เป็น targetAddress
