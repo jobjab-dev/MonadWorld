@@ -103,82 +103,30 @@ export default function DocsPage() {
 
         <hr className="docs-section-divider" />
         
-        {/* Section 3: Gameplay & Rewards */}
+        {/* Section 3: Community Strategy */}
         <section className="mb-12 md:mb-16">
-          <h2 className="docs-h2">3. Gameplay & Rewards</h2>
+          <h2 className="docs-h2">3. Community & Player Engagement</h2>
           
           <div className="mb-8">
-            <h3 className="docs-h3">3.1 Minting Your Lilnad NFT</h3>
-            <p className="docs-paragraph">Minting process:</p>
+            <h3 className="docs-h3">3.1 Building the Community</h3>
+            <p className="docs-paragraph">Our strategy for Season 0:</p>
             <ul className="docs-list">
-              <li><strong>Step 1:</strong> Call <code>commitMintSingle</code>, <code>commitMint10</code>, or <code>commitMint25</code></li>
-              <li><strong>Step 2:</strong> Call <code>revealMint*</code> to receive a random rank</li>
-              <li><strong>Late reveals:</strong> Players who fail to reveal within 64 blocks (approximately 32 seconds) will be penalized and assigned an F rank.</li>
-            </ul>
-            <p className="docs-paragraph">Pack options:</p>
-            <ul className="docs-list">
-              <li><strong>Single:</strong> One NFT</li>
-              <li><strong>Ten Pack:</strong> 10+1 bonus NFT</li>
-              <li><strong>Mega Pack:</strong> 25+3 bonus NFTs</li>
-              <li>Expired-reveal slots shown as static cards</li>
+              <li><strong>User Acquisition:</strong> Attracting active players through incentives and engaging gameplay</li>
+              <li><strong>Retention:</strong> Creating compelling reasons for players to return daily</li>
+              <li><strong>Education:</strong> Helping players understand how ranking and points work</li>
+              <li><strong>Feedback Loop:</strong> Constantly improving based on community input</li>
             </ul>
           </div>
 
           <div className="mb-8">
-            <h3 className="docs-h3">3.2 Soul-Bound Tokens (SBTs) & Scoring</h3>
-            <p className="docs-paragraph">Point system:</p>
+            <h3 className="docs-h3">3.2 Player Incentives During Season 0</h3>
+            <p className="docs-paragraph">While building toward $LOVE token:</p>
             <ul className="docs-list">
-              <li><strong>Passive Points:</strong> Points accumulate automatically without needing to collect</li>
-              <li><strong>Accrual rate:</strong> Points per second = <code>S/T</code> (totalPoints/lifetimeSecs)</li>
-              <li><strong>Display:</strong> Points/minute via <code>calculateNftPoints</code></li>
-              <li><strong>Expiration:</strong> No more points accrue after expiry date</li>
-              <li><strong>Formatting:</strong> 2 decimals with thousands separators in the UI</li>
-            </ul>
-          </div>
-
-          <div className="mb-8">
-            <h3 className="docs-h3">3.3 Seasonal Rewards with Love Tokens (LOVE)</h3>
-            <p className="docs-paragraph">MonadWorld's seasonal reward system:</p>
-            <ul className="docs-list">
-              <li><strong>Snapshots:</strong> Player points recorded every 7 days</li>
-              <li><strong>Reward Pool:</strong> MON from minting fees (minus 5% dev fee)</li>
-              <li><strong>LOVE Generation:</strong> 1 MON creates 2 LOVE tokens</li>
-              <li><strong>Liquidity Provision:</strong> 
-                <ul className="docs-list docs-list-sm">
-                  <li>Seasonal MON + half of minted LOVE provide liquidity</li>
-                  <li>Creates MON/LOVE trading pair on DEX</li>
-                </ul>
-              </li>
-              <li><strong>Player Rewards:</strong>
-                <ul className="docs-list docs-list-sm">
-                  <li>The other half of minted LOVE tokens are used for player rewards</li>
-                  <li>All rewards are distributed through a lottery system</li>
-                  <li>Rewards based on total points accumulated during the season</li>
-                  <li>Higher ranks give better point accrual rates, leading to better rewards</li>
-                  <li>Seasonal snapshots capture your point totals for reward calculations</li>
-                  <li>Players can view their total entry tickets on the leaderboard</li>
-                </ul>
-              </li>
-              <li><strong>Lottery System:</strong>
-                <ul className="docs-list docs-list-sm">
-                  <li><strong>Entry Method:</strong> 1 point = 1 lottery ticket</li>
-                  <li><strong>Eligibility:</strong> All players are eligible, regardless of ranking</li>
-                  <li><strong>Chance-based:</strong> Players may or may not win, depending on their luck and number of tickets</li>
-                  <li><strong>Probability:</strong> More points = more tickets = higher chance of winning</li>
-                  <li><strong>Reward Claiming:</strong> Winners can claim their rewards 2-3 days after season ends</li>
-                  <li><strong>Distribution:</strong> LOVE tokens claimed through the platform and sent to winners' wallets</li>
-                  <li><strong>Prize Structure:</strong> Determined off-chain for each season</li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-           <div className="mb-8">
-            <h3 className="docs-h3">3.4 NFT Expiration & Passive Points</h3>
-            <p className="docs-paragraph">User experience improvements:</p>
-            <ul className="docs-list">
-              <li><strong>Expiration Display:</strong> Clearly shown on each SbtCard</li>
-              <li><strong>Passive Earning:</strong> Points accrue automatically without manual collection</li>
-              <li><strong>Real-time Updates:</strong> Point totals update in real-time on the UI</li>
+              <li><strong>Leaderboard Recognition:</strong> Top players highlighted</li>
+              <li><strong>Early Adopter Benefits:</strong> Special recognition for Season 0 participants</li>
+              <li><strong>Community Events:</strong> Regular activities to maintain engagement</li>
+              <li><strong>Point Accumulation:</strong> Building up points that will be valuable when $LOVE launches</li>
+              <li><strong>Mainnet Snapshot:</strong> Your status and points will be captured when Monad announces mainnet, marking the end of Season 0</li>
             </ul>
           </div>
         </section>
@@ -190,17 +138,31 @@ export default function DocsPage() {
           <h2 className="docs-h2">4. Project Roadmap</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="docs-h3">Current Phase (Testnet Focus)</h3>
+              <h3 className="docs-h3">Current Phase: Season 0 (Testnet Focus)</h3>
+              <p className="docs-paragraph">We are currently in Season 0, an initial phase with no set end date. This phase focuses on building our player base and refining core mechanics before $LOVE token launch.</p>
+              <p className="docs-paragraph"><strong className="text-pixel-accent">Important:</strong> Season 0 will conclude on the day Monad announces its mainnet launch. We will take a snapshot of all player data on that day, which will be used for future rewards and benefits.</p>
               <ul className="docs-list">
                 <li><strong>Security:</strong> Enhancing Smart Contract security</li>
                 <li><strong>Core Logic:</strong> Refining minting and SBT mechanics</li>
                 <li><strong>Performance:</strong> Optimizing blockchain data fetching</li>
                 <li><strong>UX Improvements:</strong> Point collection and NFT status visibility</li>
+                <li><strong>Community Building:</strong> Attracting and engaging a sufficient player base</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="docs-h3">$LOVE Token Implementation</h3>
+              <p className="docs-paragraph">The next major milestone after Season 0 will be the launch of our $LOVE token. This will only happen once we reach a critical mass of active players.</p>
+              <ul className="docs-list">
+                <li><strong>Prerequisites:</strong> Minimum active player count threshold</li>
+                <li><strong>Token Launch:</strong> ERC20 $LOVE token deployment</li>
+                <li><strong>Liquidity:</strong> Creation of MON/LOVE trading pair</li>
+                <li><strong>Reward System:</strong> Seasonal point-based reward distribution</li>
               </ul>
             </div>
             <div>
               <h3 className="docs-h3">Future Phases</h3>
               <ul className="docs-list">
+                <li><strong>Season Structure:</strong> Defined seasons with clear start/end dates after $LOVE launch</li>
                 <li><strong>Rewards System:</strong> Full seasonal LOVE token implementation</li>
                 <li><strong>Off-chain Tools:</strong> Scripts for reward calculations, lottery draws, and Merkle Tree generation</li>
                 <li><strong>Frontend:</strong> User-friendly reward claim system allowing winners to claim prizes 2-3 days after season end</li>

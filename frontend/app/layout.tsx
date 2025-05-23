@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 // import { Geist, Geist_Mono } from "next/font/google"; // Previous fonts
-import { Pixelify_Sans } from "next/font/google"; // New Pixel font
+import { Pixelify_Sans, VT323, Press_Start_2P } from "next/font/google"; // Pixel fonts
 import "./globals.css";
 import Providers from '@/components/providers'
 import Navbar from '@/components/Navbar'
@@ -11,6 +11,21 @@ const pixelifySans = Pixelify_Sans({
   subsets: ['latin'],
   variable: '--font-pixelify-sans', // CSS variable name
   weight: ['400', '500', '600', '700'] // Choose weights you need
+});
+
+// Configure VT323 - Good for body text and readability with pixel aesthetic
+const vt323 = VT323({
+  subsets: ['latin'],
+  variable: '--font-vt323',
+  weight: ['400'] // VT323 only comes in 400 weight
+});
+
+// Configure Press Start 2P - The classic 8-bit gaming font, great for headings
+const pressStart2P = Press_Start_2P({
+  subsets: ['latin'],
+  variable: '--font-press-start-2p',
+  weight: ['400'], // Press Start 2P only comes in 400 weight
+  display: 'swap',
 });
 
 // Update or define these metadata constants
@@ -79,7 +94,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${pixelifySans.variable} antialiased`}
+        className={`${pixelifySans.variable} ${vt323.variable} ${pressStart2P.variable} antialiased`}
       >
         <Providers>
           <div className="flex flex-col min-h-screen">

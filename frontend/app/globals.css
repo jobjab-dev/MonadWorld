@@ -9,7 +9,7 @@
     color: #E6E6FA;            /* pixel-text */
     min-height: 100vh;
     @apply antialiased;
-    font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-vt323), ui-sans-serif, system-ui, sans-serif;
     image-rendering: pixelated;
   }
 
@@ -43,16 +43,328 @@ body:after {
 
 /* NAVBAR STYLING */
 .MonadWorld, .Home, .Mint, .Collect, .Leaderboard {
+  color: #F0E68C;
+  text-shadow: 2px 2px 0 #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Enhanced Leaderboard Pixel Art Styling */
+.shadow-pixel-sm {
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.shadow-pixel-md {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8);
+}
+
+.shadow-pixel-lg {
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.9);
+}
+
+.shadow-pixel-xl {
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 1);
+}
+
+/* เพิ่มคลาสสำหรับหน้า Leaderboard โดยเฉพาะ */
+.leaderboard-container {
+  position: relative;
+  border: 6px solid;
+  border-top-color: #BA68C8;
+  border-left-color: #BA68C8;
+  border-right-color: #4a1681;
+  border-bottom-color: #4a1681;
+  background-color: rgba(73, 28, 95, 0.9);
+  box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+/* เอฟเฟกต์กระพริบสำหรับอันดับผู้ใช้ */
+@keyframes pixel-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pixel-pulse 3s ease-in-out infinite;
+}
+
+/* เอฟเฟกต์สีสำหรับแถวตาราง */
+.leaderboard-row-hover:hover {
+  background-color: rgba(74, 41, 128, 0.7) !important;
+  transform: translateY(-1px);
+  transition: all 0.15s ease-in-out;
+}
+
+/* สไตล์สำหรับหัวข้อตาราง */
+.leaderboard-header {
+  background-color: #6930c3 !important;
   color: #F0E68C !important;
-  text-shadow: 2px 2px 0 #000 !important;
+  text-shadow: 2px 2px 0 #000;
+  font-size: 1.5rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Press Start 2P', monospace !important;
+  text-align: center !important;
+  padding: 0.875rem 0.75rem !important;
+  border-bottom: 3px solid #BA68C8 !important;
+}
+
+/* โทนสีตาราง - เซลล์ */
+.leaderboard-cell {
+  border-right: 4px solid #4a2980 !important;
+  padding: 0.875rem 1rem !important;
+  text-align: center !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.5rem !important;
+  transition: all 0.15s ease;
+  vertical-align: middle !important;
+}
+
+.leaderboard-cell:last-child {
+  border-right: none !important;
+}
+
+/* Top 3 rankings special styling */
+.rank-1, .rank-2, .rank-3 {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 2rem !important;
   font-weight: bold !important;
+  border: 3px solid !important;
+  position: relative !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+.rank-1 {
+  background-color: #FFD700 !important; /* gold */
+  color: #000 !important;
+  border-top-color: #FFF0A5 !important;
+  border-left-color: #FFF0A5 !important;
+  border-right-color: #B8860B !important;
+  border-bottom-color: #B8860B !important;
+}
+
+.rank-2 {
+  background-color: #C0C0C0 !important; /* silver */
+  color: #000 !important;
+  border-top-color: #E0E0E0 !important;
+  border-left-color: #E0E0E0 !important;
+  border-right-color: #A0A0A0 !important;
+  border-bottom-color: #A0A0A0 !important;
+}
+
+.rank-3 {
+  background-color: #CD7F32 !important; /* bronze */
+  color: #000 !important;
+  border-top-color: #EEBE7A !important;
+  border-left-color: #EEBE7A !important;
+  border-right-color: #955A24 !important;
+  border-bottom-color: #955A24 !important;
+}
+
+/* Pagination pixel button styles */
+.pagination-button {
+  padding: 0.6rem 1.25rem !important;
+  font-size: 1.125rem !important;
+  font-family: var(--font-vt323), monospace !important;
+  background-color: #8A2BE2 !important;
+  color: #F0E68C !important;
+  border: 3px solid !important;
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important;
+  border-right-color: #4a1681 !important;
+  border-bottom-color: #4a1681 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  transition: all 0.15s !important;
+}
+
+.pagination-button:hover:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.pagination-button:active:not(:disabled) {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 1px 1px 0 #000 !important;
+}
+
+.pagination-button:disabled {
+  background-color: #666 !important;
+  color: #999 !important;
+  border-color: #777 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+}
+
+/* leaderboard top card */
+.leaderboard-title-card {
+  position: relative !important;
+  background-color: #8A2BE2 !important;
+  padding: 1.5rem 2.5rem !important;
+  border: 6px solid !important;
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important;
+  border-right-color: #4a1681 !important;
+  border-bottom-color: #4a1681 !important;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.8) !important;
+  margin-bottom: 2rem !important;
+}
+
+.leaderboard-title-card h1 {
+  font-size: 3rem !important;
+  color: #F0E68C !important;
+  text-shadow: 4px 4px 0 #000 !important;
+  font-family: 'Press Start 2P', monospace !important;
   text-transform: uppercase !important;
   letter-spacing: 2px !important;
 }
 
+/* หน้า leaderboard โดยเฉพาะ */
+.leaderboard-page {
+  background-image: 
+    linear-gradient(rgba(48, 25, 52, 0.9), rgba(48, 25, 52, 0.9)),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(138, 43, 226, 0.1) 2px, rgba(138, 43, 226, 0.1) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(138, 43, 226, 0.1) 2px, rgba(138, 43, 226, 0.1) 4px);
+  padding: 2rem 1rem !important;
+  border-left: 6px solid #4a1681 !important;
+  border-right: 6px solid #4a1681 !important;
+  min-height: 100vh !important;
+}
+
+/* ปรับแต่งการ์ดแสดงอันดับผู้ใช้ */
+.user-rank-card {
+  background-color: #3b1f60 !important;
+  border: 4px solid !important;
+  border-top-color: #BA68C8 !important; 
+  border-left-color: #BA68C8 !important;
+  border-right-color: #4a1681 !important;
+  border-bottom-color: #4a1681 !important;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8) !important;
+  padding: 1.25rem !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.user-rank-card:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%) !important;
+}
+
+.user-rank-number {
+  background-color: #F0E68C !important;
+  color: #301934 !important;
+  border: 3px solid !important;
+  border-top-color: #FFF0A5 !important;
+  border-left-color: #FFF0A5 !important;
+  border-right-color: #B8860B !important;
+  border-bottom-color: #B8860B !important;
+  width: 4rem !important;
+  height: 4rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 2rem !important;
+  font-weight: bold !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.user-rank-points {
+  background-color: #8A2BE2 !important;
+  color: #F0E68C !important;
+  padding: 0.75rem !important;
+  border: 3px solid !important;
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important; 
+  border-right-color: #4a1681 !important;
+  border-bottom-color: #4a1681 !important;
+  text-align: center !important;
+  min-width: 8rem !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+.user-rank-info {
+  flex-grow: 1 !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.user-rank-title {
+  font-family: 'Press Start 2P', monospace !important;
+  color: #F0E68C !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.user-rank-address {
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.75rem !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+}
+
+/* ปุ่ม Refresh */
+.refresh-button {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border: 3px solid !important;
+  border-top-color: #81C784 !important;
+  border-left-color: #81C784 !important;
+  border-right-color: #2E7D32 !important;
+  border-bottom-color: #2E7D32 !important;
+  padding: 0.5rem 1rem !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.25rem !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.15s !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.375rem !important;
+}
+
+.refresh-button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8) !important;
+  background-color: #3e8e41 !important;
+}
+
+.refresh-button:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+.last-updated {
+  background-color: #301934 !important;
+  border: 3px solid !important;
+  border-top-color: #BA68C8 !important;
+  border-left-color: #BA68C8 !important;
+  border-right-color: #4a1681 !important;
+  border-bottom-color: #4a1681 !important;
+  padding: 0.375rem 0.75rem !important;
+  color: #F0E68C !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.125rem !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8) !important;
+}
+
+/* The rest of your existing CSS */
+
 /* TITLE STYLING */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-shadow: 3px 3px 0 #000 !important;
   letter-spacing: 2px !important;
   text-transform: uppercase !important;
@@ -107,7 +419,7 @@ button,
   cursor: pointer !important;
   box-shadow: 4px 4px 0 #000 !important;
   text-transform: uppercase !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   letter-spacing: 2px !important;
   transition: transform 0.1s, box-shadow 0.1s !important;
   margin: 5px 10px !important;
@@ -145,7 +457,7 @@ td {
 }
 
 /* NFT CARD STYLING - GENERAL CONTAINER */
-.grid > div,
+\.collection-grid > div,
 td > div {
   border: 4px solid #9C27B0 !important;
   background-color: #301934 !important;
@@ -165,29 +477,29 @@ td > div {
 }
 
 /* NFT CARD HOVER EFFECT */
-.grid > div:hover,
+\.collection-grid > div:hover,
 td > div:hover {
   transform: translate(-3px, -3px) !important;
   box-shadow: 9px 9px 0 #000 !important;
 }
 
 /* NFT CARD TITLE */
-.grid > div > div:first-child,
+\.collection-grid > div > div:first-child,
 td > div > div:first-child {
   background-color: #8A2BE2 !important;
   color: #F0E68C !important;
   padding: 8px !important;
-  font-size: 1.1rem !important;
+  font-size: 1.2rem !important;
   font-weight: bold !important;
   text-align: center !important;
   border-bottom: 4px solid #BA68C8 !important;
   text-shadow: 2px 2px 0 #000 !important;
   letter-spacing: 1px !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
 }
 
 /* NFT CARD IMAGE */
-.grid > div > img,
+\.collection-grid > div > img,
 td > div > img {
   width: 100% !important;
   height: auto !important;
@@ -197,30 +509,30 @@ td > div > img {
 }
 
 /* NFT DATA SECTIONS */
-.grid > div > div:not(:first-child),
+\.collection-grid > div > div:not(:first-child),
 td > div > div:not(:first-child) {
   padding: 6px 8px !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   line-height: 1.3 !important;
   font-size: 0.9rem !important;
   position: relative !important;
 }
 
 /* STYLE DATA ROWS WITH ALTERNATING BACKGROUNDS */
-.grid > div > div:nth-child(odd):not(:first-child),
+\.collection-grid > div > div:nth-child(odd):not(:first-child),
 td > div > div:nth-child(odd):not(:first-child) {
   background-color: rgba(138, 43, 226, 0.1) !important;
 }
 
 /* MAKE DATA LABELS BOLD AND COLORED */
-.grid > div > div:nth-child(n+2):nth-child(-n+5),
+\.collection-grid > div > div:nth-child(n+2):nth-child(-n+5),
 td > div > div:nth-child(n+2):nth-child(-n+5) {
   color: #F0E68C !important;
   font-weight: bold !important;
 }
 
 /* HIDE METADATA, LAST COLLECT, MINTED INFO - MORE SPECIFIC */
-.grid > div > div:nth-child(n+5),  /* Hide 5th div and onwards in grid layout */
+\.collection-grid > div > div:nth-child(n+5),  /* Hide 5th div and onwards in grid layout */
 td > div > div:nth-child(n+5),     /* Hide 5th div and onwards in table layout */
 div:has(> span:contains("Last Collect")),
 div:has(> span:contains("Minted")),
@@ -229,7 +541,7 @@ div:has(> span:contains("Metadata")) {
 }
 
 /* COLLECT BUTTON STYLING */
-.grid > div > button,
+\.collection-grid > div > button,
 td > div > button {
   background-color: #F0E68C !important;
   color: #301934 !important;
@@ -240,7 +552,7 @@ td > div > button {
   text-transform: uppercase !important;
   cursor: pointer !important;
   transition: all 0.1s !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   letter-spacing: 1px !important;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3) !important;
   position: relative !important;
@@ -253,7 +565,7 @@ td > div > button {
 }
 
 /* COLLECT BUTTON HOVER */
-.grid > div > button:hover,
+\.collection-grid > div > button:hover,
 td > div > button:hover {
   background-color: #DAA520 !important;
   color: white !important;
@@ -264,7 +576,7 @@ td > div > button:hover {
 }
 
 /* PIXEL CORNER DECORATIONS */
-.grid > div:before,
+\.collection-grid > div:before,
 td > div:before {
   content: '' !important;
   position: absolute !important;
@@ -276,7 +588,7 @@ td > div:before {
   z-index: 5 !important;
 }
 
-.grid > div:after,
+\.collection-grid > div:after,
 td > div:after {
   content: '' !important;
   position: absolute !important;
@@ -317,183 +629,6 @@ div:has(> a[href*="http://local"]) {
   display: none !important;
 }
 
-/* -------[ ปุ่ม COLLECT SCORE แบบใหม่ SIMPLIFIED ]------- */
-td > div > button,
-.grid > div > button {
-  /* พื้นฐาน */
-  width: 100% !important;
-  padding: 10px 0 !important;
-  margin-top: 5px !important;
-  
-  /* สไตล์ */
-  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
-  border: 3px solid #8B4513 !important;
-  border-radius: 2px !important;
-  
-  /* ข้อความ */
-  color: #000000 !important;
-  font-family: 'VT323', monospace !important;
-  font-size: 18px !important;
-  font-weight: bold !important;
-  letter-spacing: 1px !important;
-  text-shadow: 1px 1px 0px #FFFFFF !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  
-  /* เอฟเฟกต์ */
-  box-shadow: 0px 4px 0px #5c3c0d !important;
-  position: relative !important;
-  transition: all 0.1s !important;
-  transform: translateY(0) !important;
-  cursor: pointer !important;
-}
-
-/* hover */
-td > div > button:hover,
-.grid > div > button:hover {
-  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0px 6px 0px #5c3c0d !important;
-}
-
-/* active */
-td > div > button:active,
-.grid > div > button:active {
-  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
-  transform: translateY(2px) !important;
-  box-shadow: 0px 2px 0px #5c3c0d !important;
-}
-
-/* ซ่อนข้อมูล Last Collect, Minted, Metadata - ตรงตาม SbtCard Component */
-.space-y-1 > p:nth-child(4),
-.space-y-1 > p:nth-child(5),
-.space-y-1 > p:nth-child(6),
-.space-y-1 > p.text-xs.text-gray-400,
-.space-y-1 > p.text-xs.text-gray-500 {
-  display: none !important;
-}
-
-/* เฉพาะเจาะจงกับข้อความใน Last Collect, Minted และ Metadata */
-p:has(> span.font-medium:contains("Last Collect")),
-p:has(> span.font-medium:contains("Minted")), 
-p:has(> span.font-medium:contains("Metadata")) {
-  display: none !important;
-}
-
-/* สำหรับ Production Build (ไม่สนับสนุน :has และ :contains) */
-.text-xs.text-gray-400,
-.text-xs.text-gray-500.truncate {
-  display: none !important;
-}
-
-/* -------[ ปุ่ม COLLECT SCORE แบบใหม่ ]------- */
-button[onClick="handleCollect"],
-.w-full.px-4.py-2.bg-pixel-accent,
-button:has(+ p.text-xs.text-gray-400) {
-  /* พื้นฐาน */
-  width: 100% !important;
-  padding: 10px 0 !important;
-  margin-top: 5px !important;
-  
-  /* สไตล์ */
-  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
-  border: 3px solid #8B4513 !important;
-  border-radius: 0 !important;
-  
-  /* ข้อความ */
-  color: #000000 !important;
-  font-family: 'VT323', monospace !important;
-  font-size: 18px !important;
-  font-weight: bold !important;
-  letter-spacing: 1px !important;
-  text-shadow: 1px 1px 0px #FFFFFF, -1px -1px 0px rgba(0,0,0,0.3) !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  
-  /* เอฟเฟกต์ */
-  box-shadow: 0px 4px 0px #5c3c0d !important;
-  position: relative !important;
-  transition: all 0.1s !important;
-  transform: translateY(0) !important;
-  cursor: pointer !important;
-}
-
-/* hover */
-button[onClick="handleCollect"]:hover,
-.w-full.px-4.py-2.bg-pixel-accent:hover,
-button:has(+ p.text-xs.text-gray-400):hover {
-  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0px 6px 0px #5c3c0d !important;
-}
-
-/* active */
-button[onClick="handleCollect"]:active,
-.w-full.px-4.py-2.bg-pixel-accent:active,
-button:has(+ p.text-xs.text-gray-400):active {
-  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
-  transform: translateY(2px) !important;
-  box-shadow: 0px 2px 0px #5c3c0d !important;
-}
-
-/* CSS Selector แบบง่ายที่สุดที่ควรทำงานได้ทุกกรณี */
-.p-3.space-y-1.flex-grow.bg-gray-800 > p:nth-child(n+4) {
-  display: none !important;
-}
-
-/* Collect BUTTON - simplest selector */
-.w-full.px-4.py-2 {
-  background: linear-gradient(to bottom, gold, darkgoldenrod) !important;
-  color: black !important;
-  font-size: 18px !important;
-  font-weight: bold !important;
-  text-shadow: 1px 1px white !important;
-  box-shadow: 0 4px 0 #5a3805 !important;
-  border: 0 !important;
-  transition: all 0.1s !important;
-}
-
-.w-full.px-4.py-2:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 0 #5a3805 !important;
-}
-
-.w-full.px-4.py-2:active {
-  transform: translateY(2px) !important;
-  box-shadow: 0 2px 0 #5a3805 !important;
-}
-
-/* ปรับปรุงปุ่ม COLLECT ให้ตรงและสวยงาม */
-.w-full.px-4.py-2, button.w-full {
-  width: 100% !important;
-  margin: 0 !important; /* ลบ margin ทั้งหมด */
-  padding: 12px 0 !important;
-  box-sizing: border-box !important;
-  background: linear-gradient(to bottom, #FFDF00, #DAA520) !important;
-  color: black !important;
-  font-size: 18px !important;
-  font-weight: bold !important;
-  text-shadow: 1px 1px 0 #FFFFFF !important;
-  border: 0 !important;
-  border-radius: 0 !important; /* ลบ border radius */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 0 #5a3805 !important;
-  transition: all 0.1s !important;
-  font-family: 'VT323', 'Press Start 2P', monospace !important;
-  letter-spacing: 1px !important;
-}
-
-.w-full.px-4.py-2:hover, button.w-full:hover {
-  background: linear-gradient(to bottom, #FFE140, #FFBF00) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 0 #5a3805 !important;
-}
-
-.w-full.px-4.py-2:active, button.w-full:active {
-  transform: translateY(2px) !important;
-  background: linear-gradient(to bottom, #FFBF00, #B8860B) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 0 #5a3805 !important;
-}
-
 /* NAVBAR STYLING - PIXEL ART STYLE */
 nav, .navbar, header, .header, .fixed {
   background-color: #4B0082 !important;
@@ -506,36 +641,36 @@ nav, .navbar, header, .header, .fixed {
 /* Menu Items ใน Navbar */
 nav a, .navbar a, header a, .header a, .fixed a,
 .MonadWorld, .Home, .Mint, .Collect, .Leaderboard {
-  color: #F0E68C !important;
-  text-shadow: 2px 2px 0 #000 !important;
-  font-weight: bold !important;
-  text-transform: uppercase !important;
-  letter-spacing: 2px !important;
-  padding: 8px 16px !important;
-  border: 2px solid transparent !important;
-  transition: all 0.1s !important;
-  margin: 0 3px !important;
+  color: #F0E68C;
+  text-shadow: 2px 2px 0 #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  transition: all 0.1s;
+  margin: 0 3px;
 }
 
 /* Menu Items Hover Effect */
 nav a:hover, .navbar a:hover, header a:hover, .header a:hover, .fixed a:hover,
 .MonadWorld:hover, .Home:hover, .Mint:hover, .Collect:hover, .Leaderboard:hover {
-  background-color: #8A2BE2 !important;
-  border: 2px solid #BA68C8 !important;
-  border-right-color: #4A148C !important;
-  border-bottom-color: #4A148C !important;
-  transform: translate(-1px, -1px) !important;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.7) !important;
+  background-color: #8A2BE2;
+  border: 2px solid #BA68C8;
+  border-right-color: #4A148C;
+  border-bottom-color: #4A148C;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.7);
 }
 
 /* Active Menu Item */
 nav a.active, .navbar a.active, header a.active, .header a.active, .fixed a.active,
 .Collect.active {
-  background-color: #9C27B0 !important;
-  border: 2px solid #BA68C8 !important;
-  border-right-color: #4A148C !important;
-  border-bottom-color: #4A148C !important;
-  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3) !important;
+  background-color: #9C27B0;
+  border: 2px solid #BA68C8;
+  border-right-color: #4A148C;
+  border-bottom-color: #4A148C;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3);
 }
 
 /* เพิ่มเอฟเฟกต์ดอทพิกเซลบน Navbar */
@@ -568,6 +703,7 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   border-width: 4px;
   border-color: #8A2BE2; /* pixel-purple-medium */
   box-shadow: 6px 6px 0px #000 !important; /* equivale a shadow-pixel-xl */
+  font-family: var(--font-vt323), monospace !important;
 }
 
 .docs-main-title-container {
@@ -576,8 +712,9 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   margin-bottom: 3rem !important; /* equivale a mb-12 */
 }
 
+/* Docs: Main title (h1) */
 .docs-h1 {
-  font-size: 2.5rem !important; /* Match global h1 */
+  font-size: 4rem !important;
   font-weight: bold !important;
   color: #F0E68C !important; /* pixel-accent */
   letter-spacing: 2px !important; /* Match global h1 */
@@ -591,7 +728,7 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   padding: 0.625rem 1.25rem !important; /* 10px 20px, match global h1 padding */
   box-shadow: 8px 8px 0px #000 !important; /* Match global h1 shadow */
   text-transform: uppercase !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-shadow: 3px 3px 0 #000 !important; /* Match global h1 text-shadow */
   background-color: #4B0082 !important; /* brand-purple-dark, match global h1 background */
   display: inline-block !important;
@@ -599,7 +736,7 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
 }
 
 .docs-h2 {
-  font-size: 1.875rem !important; /* equivale a text-2xl/3xl */
+  font-size: 3rem !important;
   font-weight: bold !important;
   color: #F0E68C !important; /* pixel-accent */
   border-bottom-width: 4px !important;
@@ -609,12 +746,13 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   text-align: left !important;
   text-transform: uppercase !important;
   letter-spacing: 2px !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-shadow: 3px 3px 0 #000 !important;
 }
 
+/* Docs: Section title (h2) */
 .docs-h3 {
-  font-size: 1.5rem !important; /* equivale a text-xl/2xl */
+  font-size: 2.5rem !important;
   font-weight: 600 !important; /* semibold */
   color: #D8BFD8 !important; /* pixel-purple-light */
   margin-bottom: 0.75rem !important;
@@ -622,10 +760,11 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   text-align: left !important;
   text-transform: uppercase !important;
   letter-spacing: 1px !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-shadow: 2px 2px 0 #000 !important;
 }
 
+/* Docs: Sub-section title (h3) */
 .docs-h4 {
   font-size: 1.25rem !important; /* equivale a text-lg/xl */
   font-weight: 600 !important;
@@ -634,30 +773,31 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   text-align: left !important;
   text-transform: uppercase !important; /* Kept uppercase for consistency with other h tags */
   letter-spacing: 0.5px !important;
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-shadow: 1px 1px 0 #000 !important;
 }
 
+/* Docs: Paragraph text */
 .docs-paragraph {
-  font-size: 1rem !important; /* text-base */
+  font-size: 1.25rem !important;
   line-height: 1.75 !important; /* leading-relaxed */
   text-align: left !important;
   margin-bottom: 1rem !important;
   color: #E6E6FA !important; /* pixel-text */
-  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-family: var(--font-vt323), ui-sans-serif, system-ui, sans-serif !important;
   text-transform: none !important; /* CRITICAL: Override global uppercase for paragraphs */
   text-shadow: none !important; /* CRITICAL: Override global text-shadow for paragraphs */
   letter-spacing: normal !important; /* CRITICAL: Override global letter-spacing */
 }
 
 .docs-sub-paragraph {
-  font-size: 0.9rem !important; /* text-sm or slightly larger */
+  font-size: 1rem !important;
   opacity: 0.9 !important;
   line-height: 1.65 !important; /* leading-relaxed adjusted */
   text-align: left !important;
   margin-bottom: 0.75rem !important;
   color: #E6E6FA !important; /* pixel-text */
-  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-family: var(--font-vt323), ui-sans-serif, system-ui, sans-serif !important;
   text-transform: none !important;  /* CRITICAL */
   text-shadow: none !important; /* CRITICAL */
   letter-spacing: normal !important; /* CRITICAL */
@@ -671,12 +811,13 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   text-align: left !important;
 }
 
+/* Docs: List item text */
 .docs-list li {
-  font-size: 1rem !important; /* text-base */
+  font-size: 1.25rem !important;
   line-height: 1.75 !important;
   margin-bottom: 0.5rem !important; /* space-y-2 on parent */
   color: #E6E6FA !important; /* pixel-text */
-  font-family: var(--font-pixelify-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-family: var(--font-vt323), ui-sans-serif, system-ui, sans-serif !important;
   text-transform: none !important; /* CRITICAL */
   text-shadow: none !important; /* CRITICAL */
   letter-spacing: normal !important; /* CRITICAL */
@@ -713,7 +854,7 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
   transition: all 0.15s ease-in-out !important;
   border-width: 2px !important;
   border-color: #DAA520 !important; /* amber-700 */
-  font-family: var(--font-pixelify-sans), monospace !important;
+  font-family: var(--font-vt323), monospace !important;
   text-transform: uppercase !important;
   letter-spacing: 1px !important;
 }
@@ -738,4 +879,2555 @@ nav:before, .navbar:before, header:before, .header:before, .fixed:before {
 
 .docs-contract-item {
   padding-top: 0.25rem !important; /* pt-1 */
+}
+
+/* เพิ่มสไตล์การ์ดสำหรับหน้า mint */
+.flex-wrap > div.w-72 {
+  position: relative !important;
+  border: 6px solid !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important;
+  overflow: visible !important;
+  margin: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.flex-wrap > div.w-72:before {
+  content: '' !important;
+  position: absolute !important;
+  top: -3px !important;
+  left: -3px !important;
+  right: -3px !important;
+  bottom: -3px !important;
+  background: transparent !important;
+  border: 3px dashed rgba(138, 43, 226, 0.4) !important;
+  border-radius: 18px !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+.flex-wrap > div.w-72:hover {
+  transform: translateY(-12px) !important;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+}
+
+.flex-wrap > div.w-72 > div:first-child {
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+}
+
+/* ปรับปรุงปุ่มภายในการ์ด */
+.flex-wrap > div.w-72 button {
+  margin: 5px auto !important;
+  width: 90% !important;
+  border-radius: 8px !important;
+  font-size: 1.1rem !important;
+}
+
+/* เพิ่มสไตล์การ์ดแบบ Pixel Art */
+.flex-wrap > div.w-72 {
+  position: relative !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 20px !important;
+  overflow: visible !important;
+  image-rendering: pixelated !important;
+  background: transparent !important;
+}
+
+/* สร้างขอบแบบ Pixel ด้วย box-shadow */
+.flex-wrap > div.w-72:before {
+  content: '' !important;
+  position: absolute !important;
+  top: -4px !important;
+  left: -4px !important;
+  width: calc(100% + 8px) !important;
+  height: calc(100% + 8px) !important;
+  background-color: #F0E68C !important; /* สีพื้นหลังของขอบ */
+  border: none !important;
+  z-index: -1 !important;
+  box-shadow: 4px 4px 0 #000 !important; /* เงาดำด้านขวาล่าง */
+}
+
+/* ส่วนเนื้อหาการ์ด */
+.flex-wrap > div.w-72 > div:first-child {
+  border-bottom: 4px solid #BA68C8 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  padding: 12px 8px !important;
+  
+  /* แถบสีด้านบนการ์ด */
+  background: linear-gradient(to bottom, #9C27B0, #8A2BE2) !important;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255,255,255,0.4), 
+    inset -2px -2px 0 rgba(0,0,0,0.4) !important;
+  
+  /* รูปแบบข้อความ */
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+/* เนื้อหาส่วนกลางการ์ด */
+.flex-wrap > div.w-72 > div:nth-child(2) {
+  background-color: #301934 !important; /* สีพื้นหลัง */
+  padding: 12px 8px !important;
+  border-bottom: 4px solid #9C27B0 !important;
+  
+  /* เพิ่มเอฟเฟกต์มุมแบบ pixel */
+  box-shadow: 
+    inset 2px 0 0 rgba(255,255,255,0.2), 
+    inset -2px 0 0 rgba(0,0,0,0.2) !important;
+}
+
+/* ปุ่มภายในการ์ด */
+.flex-wrap > div.w-72 button {
+  background-color: #F0E68C !important; /* สีพื้นฐาน */
+  color: #301934 !important; /* สีข้อความ */
+  border: none !important;
+  border-radius: 0 !important; /* ไม่มีมุมโค้ง */
+  font-weight: bold !important;
+  padding: 10px 0 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  width: 85% !important;
+  margin: 10px auto !important;
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5) !important;
+  
+  /* เอฟเฟกต์ขอบแบบ pixel */
+  box-shadow: 
+    inset 3px 3px 0 rgba(255,255,255,0.6), 
+    inset -3px -3px 0 rgba(0,0,0,0.4),
+    4px 4px 0 #000 !important;
+  
+  transition: all 0.1s !important;
+}
+
+/* เอฟเฟกต์ hover ของปุ่ม */
+.flex-wrap > div.w-72 button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255,255,255,0.6), 
+    inset -3px -3px 0 rgba(0,0,0,0.4),
+    2px 2px 0 #000 !important;
+}
+
+/* เพิ่มพิกเซลที่มุมของการ์ด */
+.flex-wrap > div.w-72:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 4px !important;
+  height: 4px !important;
+  background-color: #F0E68C !important;
+  bottom: -4px !important;
+  right: -4px !important;
+  z-index: 2 !important;
+}
+
+/* เอฟเฟกต์เมื่อ hover ที่การ์ด */
+.flex-wrap > div.w-72:hover {
+  transform: translate(-4px, -4px) !important;
+}
+
+.flex-wrap > div.w-72:hover:before {
+  box-shadow: 8px 8px 0 #000 !important;
+}
+
+/* ปรับปรุงหน้า Reveal ให้เป็นสไตล์ Pixel Art */
+/* กล่อง Reveal ชั้นนอก */
+div.flex-col.items-center.gap-4.mt-4.w-full.max-w-md.mx-auto > div.bg-gray-800 {
+  position: relative !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: #301934 !important;
+  overflow: visible !important;
+  image-rendering: pixelated !important;
+}
+
+/* เพิ่มขอบแบบ pixel art ให้กล่อง Reveal */
+div.flex-col.items-center.gap-4.mt-4.w-full.max-w-md.mx-auto > div.bg-gray-800:before {
+  content: '' !important;
+  position: absolute !important;
+  top: -4px !important;
+  left: -4px !important;
+  width: calc(100% + 8px) !important;
+  height: calc(100% + 8px) !important;
+  background-color: #F0E68C !important; /* สีพื้นหลังของขอบ */
+  border: none !important;
+  z-index: -1 !important;
+  box-shadow: 4px 4px 0 #000 !important; /* เงาดำด้านขวาล่าง */
+}
+
+/* จุดพิกเซลที่มุมขวาล่างของ Reveal */
+div.flex-col.items-center.gap-4.mt-4.w-full.max-w-md.mx-auto > div.bg-gray-800:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 4px !important;
+  height: 4px !important;
+  background-color: #F0E68C !important;
+  bottom: -4px !important;
+  right: -4px !important;
+  z-index: 2 !important;
+}
+
+/* Countdown Timer ใน Reveal */
+div.mb-4.text-center > div.bg-indigo-900\/30,
+div.mb-4.text-center > div.bg-red-900\/30 {
+  border: none !important;
+  background-color: #301934 !important;
+  padding: 10px !important;
+  margin-bottom: 15px !important;
+  box-shadow: 
+    inset 0 0 0 4px #9C27B0, 
+    4px 4px 0 #000 !important;
+  position: relative !important;
+}
+
+/* หัวข้อใน Countdown Timer */
+div.mb-4.text-center > div.bg-indigo-900\/30 p:first-child, 
+div.mb-4.text-center > div.bg-red-900\/30 p:first-child {
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  text-transform: uppercase !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  color: #F0E68C !important;
+}
+
+/* ตัวเลขบล็อกใน Countdown Timer */
+div.mb-4.text-center > div.bg-indigo-900\/30 p.text-yellow-300,
+div.mb-4.text-center > div.bg-red-900\/30 p:nth-child(2) {
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  font-size: 1.5rem !important;
+  color: #FFFFFF !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  margin: 10px 0 !important;
+}
+
+/* ปรับปรุงปุ่ม Debug เล็กๆ */
+div.mb-4.text-center > button.px-3.py-1.bg-gray-700 {
+  font-family: var(--font-vt323), monospace !important;
+  padding: 4px 8px !important;
+  border: 1px solid #4A148C !important; 
+  background-color: #301934 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  transition: all 0.1s !important;
+}
+
+div.mb-4.text-center > button.px-3.py-1.bg-gray-700:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0 #000 !important;
+}
+
+/* เฉพาะปุ่ม Reveal */
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-green-600,
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-indigo-600,
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-blue-600,
+div.p-6.text-center > button.w-full.px-4.py-3.rounded.bg-red-600 {
+  background-color: #F0E68C !important; /* สีพื้นฐาน */
+  color: #301934 !important; /* สีข้อความ */
+  border: none !important;
+  border-radius: 0 !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5) !important;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255,255,255,0.6), 
+    inset -3px -3px 0 rgba(0,0,0,0.4),
+    4px 4px 0 #000 !important;
+  transition: all 0.1s !important;
+}
+
+/* Hover เฉพาะปุ่ม Reveal */
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-green-600:hover,
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-indigo-600:hover,
+div.p-4.text-center > button.w-full.px-4.py-2.rounded.bg-blue-600:hover,
+div.p-6.text-center > button.w-full.px-4.py-3.rounded.bg-red-600:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 
+    inset 3px 3px 0 rgba(255,255,255,0.6), 
+    inset -3px -3px 0 rgba(0,0,0,0.4),
+    2px 2px 0 #000 !important;
+}
+
+/* ปุ่ม CANCEL AND RETURN TO COMMIT และ CLEAR COMMITMENT DATA */
+button.mt-4.px-4.py-2.bg-yellow-600, 
+button.mt-4.ml-2.px-4.py-2.bg-red-700 {
+  background-color: #F0E68C !important;
+  color: #301934 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-weight: bold !important;
+  padding: 8px 16px !important;
+  margin-top: 15px !important;
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5) !important;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255,255,255,0.6), 
+    inset -2px -2px 0 rgba(0,0,0,0.4),
+    3px 3px 0 #000 !important;
+  transition: all 0.1s !important;
+}
+
+/* สีแดงสำหรับปุ่ม CLEAR COMMITMENT DATA */
+button.mt-4.ml-2.px-4.py-2.bg-red-700 {
+  background-color: #FF6347 !important; /* สีแดงอิฐ */
+}
+
+/* Hover สำหรับปุ่ม CANCEL และ CLEAR */
+button.mt-4.px-4.py-2.bg-yellow-600:hover, 
+button.mt-4.ml-2.px-4.py-2.bg-red-700:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 
+    inset 2px 2px 0 rgba(255,255,255,0.6), 
+    inset -2px -2px 0 rgba(0,0,0,0.4),
+    1px 1px 0 #000 !important;
+}
+/* หน้าต่าง Modal ตอน Processing Reveal */ 
+div.fixed.inset-0.bg-black\/70 > div.bg-gray-900 {
+  border: none !important;
+  position: relative !important;
+  background-color: #301934 !important;
+  box-shadow: 0 0 0 4px #F0E68C, 4px 4px 0 #000 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+div.fixed.inset-0.bg-black\/70 > div.bg-gray-900 h2 {
+  font-family: 'Press Start 2P', var(--font-vt323), monospace !important;
+  font-size: 1.5rem !important;
+  text-transform: uppercase !important;
+  color: #F0E68C !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  letter-spacing: 2px !important;
+}
+
+div.fixed.inset-0.bg-black\/70 > div.bg-gray-900 p {
+  font-family: var(--font-vt323), monospace !important;
+}
+
+/* ตัวกรอบสำหรับ Progress Bar */
+div.fixed.inset-0.bg-black\/70 > div.bg-gray-900 div.w-full.h-2.bg-gray-700 {
+  border: 2px solid #8A2BE2 !important;
+  height: 12px !important;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3) !important;
+}
+
+/* Pixel art styling for the Reveal section */
+#reveal-section {
+  width: 90% !important;
+  max-width: 500px !important;
+  margin: 2rem auto !important;
+}
+#reveal-section .bg-gray-800 {
+  background-color: #301934 !important; /* Dapp panel background */
+  border: 4px solid #8A2BE2 !important; /* Pixel purple border */
+  box-shadow: 4px 4px 0 #000 !important; /* Pixel shadow */
+  border-radius: 0 !important;
+}
+
+#reveal-section .mb-4.text-center > div {
+  background-color: #000000 !important;
+  border: 4px solid #F0E68C !important; /* Yellow border for timer */
+  box-shadow: 4px 4px 0 #000 !important;
+  color: #F0E68C !important;
+  font-family: var(--font-vt323), monospace !important;
+  text-transform: uppercase !important;
+  border-radius: 0 !important;
+  padding: 8px !important;
+}
+
+#reveal-section button {
+  background-color: #8A2BE2 !important; /* Pixel purple button */
+  color: #F0E68C !important;           /* Yellow text */
+  border: 4px solid #000 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-vt323), monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  image-rendering: pixelated !important;
+}
+
+#reveal-section button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+#reveal-section button:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0 0 0 #000 !important;
+}
+
+/* Hide Debug, Cancel, and Clear buttons in Reveal section */
+#reveal-section button.bg-gray-700,
+#reveal-section button.bg-yellow-600,
+#reveal-section button.bg-red-700 {
+  display: none !important;
+}
+
+/* Hide the Reveal Processing overlay modal */
+.fixed.inset-0.bg-black\/70 {
+  display: none !important;
+}
+
+/* Tooltip pixel-art styling */
+.tooltip-container {
+  position: relative !important;
+  display: inline-block !important;
+}
+.tooltip-box {
+  display: none !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background-color: #301934 !important; /* panel background */
+  border: 4px solid #F0E68C !important; /* pixel yellow border */
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 12px !important;           /* increased padding */
+  min-width: 4rem !important;        /* ensure minimum width */
+  font-family: var(--font-vt323), monospace !important;
+  text-transform: uppercase !important;
+  font-size: 0.875rem !important;      /* larger text */
+  white-space: nowrap !important;
+  z-index: 999 !important;
+}
+.tooltip-container:hover .tooltip-box {
+  display: block !important;
+}
+
+/* Override tooltip-item colors */
+.tooltip-box .tooltip-item.rarity-UR { color: #ec4899 !important; }
+.tooltip-box .tooltip-item.rarity-SSR { color: #eab308 !important; }
+.tooltip-box .tooltip-item.rarity-SR { color: #a78bfa !important; }
+.tooltip-box .tooltip-item.rarity-R { color: #60a5fa !important; }
+.tooltip-box .tooltip-item.rarity-UC { color: #4ade80 !important; }
+.tooltip-box .tooltip-item.rarity-C { color: #94a3b8 !important; }
+
+/* Highlight question mark in tooltip trigger */
+.tooltip-container > .question-mark {
+  font-size: 3rem !important;
+  color: #facc15 !important;
+  font-weight: 900 !important;
+  animation: pulse 1.5s infinite !important;
+  transition: transform 0.2s !important;
+}
+.tooltip-container > .question-mark:hover {
+  transform: scale(1.2) !important;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Docs page font family override - apply VT323 to all elements inside docs-container */
+.docs-container, .docs-container * {
+  font-family: var(--font-vt323), monospace !important;
+}
+
+/* ปรับปรุงใหม่เพื่อให้อ่านง่ายขึ้น */
+/* เพิ่มขนาดตัวอักษรและระยะห่าง */
+.docs-container {
+  padding: 3rem !important; /* เพิ่มพื้นที่ว่างโดยรอบ */
+  max-width: 65rem !important; /* กว้างขึ้นเล็กน้อย */
+  box-shadow: 10px 10px 0px #000 !important; /* เงาใหญ่ขึ้น */
+}
+
+/* ปรับปรุงหัวข้อให้โดดเด่นมากขึ้น */
+.docs-h1 {
+  font-size: 4.5rem !important; /* ใหญ่ขึ้น */
+  padding: 0.8rem 1.5rem !important; /* พื้นที่ข้างในมากขึ้น */
+  box-shadow: 12px 12px 0px #000 !important; /* เงาใหญ่ขึ้น */
+  margin-bottom: 2rem !important;
+}
+
+.docs-h2 {
+  font-size: 3.5rem !important; /* ใหญ่ขึ้น */
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  border-bottom-width: 6px !important; /* เส้นหนาขึ้น */
+  padding-bottom: 1rem !important;
+}
+
+.docs-h3 {
+  font-size: 2.8rem !important; /* ใหญ่ขึ้น */
+  margin-top: 2rem !important;
+  margin-bottom: 1.2rem !important;
+  border-left: 6px solid #BA68C8 !important; /* เพิ่มเส้นด้านซ้าย */
+  padding-left: 1rem !important;
+}
+
+.docs-h4 {
+  font-size: 1.8rem !important; /* ใหญ่ขึ้น */
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.8rem !important;
+  color: #F0E68C !important; /* เปลี่ยนสีให้เด่นขึ้น */
+}
+
+/* ปรับปรุงข้อความในย่อหน้า */
+.docs-paragraph {
+  font-size: 1.5rem !important; /* ใหญ่ขึ้น */
+  line-height: 1.8 !important; /* ระยะห่างระหว่างบรรทัดมากขึ้น */
+  margin-bottom: 1.5rem !important;
+  background-color: rgba(138, 43, 226, 0.15) !important; /* พื้นหลังอ่อนๆ */
+  padding: 1rem !important;
+  border-radius: 4px !important;
+}
+
+.docs-sub-paragraph {
+  font-size: 1.3rem !important; /* ใหญ่ขึ้น */
+  line-height: 1.8 !important;
+  margin-bottom: 1.2rem !important;
+}
+
+/* ปรับปรุงลิสต์ให้อ่านง่ายขึ้น */
+.docs-list {
+  padding-left: 2rem !important; /* เยื้องมากขึ้น */
+  margin-bottom: 1.5rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.docs-list li {
+  font-size: 1.5rem !important; /* ใหญ่ขึ้น */
+  line-height: 1.8 !important;
+  margin-bottom: 0.8rem !important; /* ระยะห่างระหว่างข้อมากขึ้น */
+  padding-left: 0.5rem !important;
+}
+
+.docs-list li::marker {
+  color: #F0E68C !important; /* สีของจุดหน้ารายการ */
+}
+
+/* ลิสต์ย่อยให้แตกต่างจากลิสต์หลัก */
+.docs-list-sm {
+  margin-top: 0.5rem !important;
+  margin-left: 1rem !important;
+  padding-left: 1.5rem !important;
+}
+
+.docs-list-sm li {
+  font-size: 1.3rem !important; /* ใหญ่ขึ้นแต่เล็กกว่ารายการหลัก */
+  margin-bottom: 0.5rem !important;
+}
+
+/* เพิ่มความชัดเจนให้กับ code */
+.docs-paragraph code,
+.docs-list li code {
+  background-color: #301934 !important; /* พื้นหลังเข้มขึ้น */
+  color: #F0E68C !important; /* สีข้อความสว่างขึ้น */
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 4px !important;
+  font-size: 1.2em !important; /* ใหญ่กว่าข้อความปกติ */
+  font-family: 'Courier New', monospace !important;
+  border: 1px solid #8A2BE2 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+/* ปรับปรุงตัวคั่นเพื่อแยกส่วนให้ชัดเจน */
+.docs-section-divider {
+  border-color: #BA68C8 !important; /* สีสว่างขึ้น */
+  margin-top: 3rem !important;
+  margin-bottom: 3rem !important;
+  border-top-width: 4px !important; /* หนาขึ้น */
+  opacity: 0.8 !important;
+}
+
+/* ปรับปรุงส่วนของ contract */
+.docs-contract-section {
+  border-left-width: 4px !important; /* หนาขึ้น */
+  margin-left: 1rem !important;
+  padding-left: 2rem !important; /* เยื้องมากขึ้น */
+  background-color: rgba(138, 43, 226, 0.1) !important; /* พื้นหลังอ่อนๆ */
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+.docs-contract-item {
+  margin-bottom: 2rem !important;
+  padding: 1rem !important;
+  background-color: rgba(138, 43, 226, 0.15) !important;
+  border-radius: 4px !important;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important;
+}
+
+/* ปรับปรุงปุ่มกลับ */
+.docs-back-button-container {
+  margin-top: 5rem !important;
+}
+
+.docs-back-button {
+  font-size: 1.5rem !important; /* ใหญ่ขึ้น */
+  padding: 1.2rem 2.5rem !important; /* ใหญ่ขึ้น */
+  box-shadow: 8px 8px 0px #000 !important; /* เงาใหญ่ขึ้น */
+}
+
+/* NAVBAR PIXEL EFFECTS - NEW */
+
+/* Pixel text shadow effect */
+.text-shadow-pixel {
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000 !important;
+}
+
+.text-shadow-sm {
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+/* Animate logo pulse effect */
+@keyframes pulse-slow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(138,43,226,0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(138,43,226,1));
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Animate the pixel dust background */
+@keyframes twinkle {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+.bg-size-8 {
+  background-size: 8px 8px;
+}
+
+/* Pixel box shadow */
+.shadow-pixel-sm {
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.shadow-pixel-md {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Tailwind height custom class */
+.h-18 {
+  height: 4.5rem; /* 72px */
+}
+
+/* Custom font utility classes */
+.font-press-start {
+  font-family: var(--font-press-start-2p), monospace !important;
+  letter-spacing: 1px;
+}
+
+.font-vt323 {
+  font-family: var(--font-vt323), monospace !important;
+  letter-spacing: 0.5px;
+}
+
+.font-pixelify {
+  font-family: var(--font-vt323), sans-serif !important;
+}
+
+/* FORCE NAVBAR LINK FONT-SIZE OVERRIDE */
+nav a, .navbar a, header a, .header a, .fixed a {
+  font-size: 1.25rem !important; /* ~36px */
+}
+
+/* Overwrite Feature Card Border */
+.page-features-section .grid > div {
+  border: 4px solid black !important;
+  border-radius: 4px !important; /* rounded-pixel-sm is 2px, md is 4px */
+  box-shadow: 4px 4px 0px #000 !important; /* shadow-pixel */
+}
+
+/* Force larger text in features section */
+.page-features-section .bg-black p {
+  font-size: 1.25rem !important;
+  line-height: 1.75 !important;
+  padding: 0.75rem 1rem !important;
+}
+
+/* Add at the end of the file, before the last NAVBAR PIXEL EFFECTS section */
+
+/* ปรับแต่งเพิ่มเติมสำหรับฟอนต์ในหน้า leaderboard */
+.font-press-start {
+  font-family: 'Press Start 2P', monospace !important;
+  letter-spacing: 2px !important;
+  line-height: 1.3 !important;
+  text-rendering: optimizeSpeed !important;
+  -webkit-font-smoothing: none !important;
+}
+
+.font-vt323 {
+  font-family: 'VT323', monospace !important;
+  letter-spacing: 1px !important;
+  text-rendering: optimizeSpeed !important;
+  -webkit-font-smoothing: none !important;
+}
+
+/* ปรับแต่งเอฟเฟกต์พิเศษสำหรับตัวหนังสือ Leaderboard */
+.text-shadow-pixel {
+  text-shadow: 
+    4px 4px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000 !important;
+}
+
+/* พิกเซลเอฟเฟกต์สำหรับตัวอักษร */
+@keyframes pixel-glow {
+  0% { text-shadow: 4px 4px 0 #000, 0 0 6px rgba(240, 230, 140, 0.3); }
+  50% { text-shadow: 4px 4px 0 #000, 0 0 12px rgba(240, 230, 140, 0.5); }
+  100% { text-shadow: 4px 4px 0 #000, 0 0 6px rgba(240, 230, 140, 0.3); }
+}
+
+.leaderboard-page h1 {
+  animation: pixel-glow 3s infinite ease-in-out;
+}
+
+/* Rank number style for profile display in navbar */
+.rank-number-small {
+  background-color: #F0E68C;
+  color: #301934;
+  border: 2px solid;
+  border-top-color: #FFF0A5;
+  border-left-color: #FFF0A5;
+  border-right-color: #B8860B;
+  border-bottom-color: #B8860B;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  font-family: var(--font-vt323), monospace;
+}
+
+.profile-rank-display {
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+  margin-right: 0.5rem;
+  position: relative;
+  overflow: visible;
+}
+
+.profile-rank-display:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+}
+
+/* Add a subtle glow effect */
+@keyframes navbar-pulse {
+  0% { box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7); }
+  50% { box-shadow: 3px 3px 5px rgba(138, 43, 226, 0.7); }
+  100% { box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7); }
+}
+
+.profile-rank-display:hover {
+  animation: navbar-pulse 1.5s ease-in-out infinite;
+}
+
+/* Animation for showing/hiding NFT Ranks & Benefits */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+/* Scale in animation for modals */
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Button Animation for NFT Ranks & Benefits */
+@keyframes pulse-border {
+  0% { border-color: rgba(139, 92, 246, 0.5); }
+  50% { border-color: rgba(139, 92, 246, 1); }
+  100% { border-color: rgba(139, 92, 246, 0.5); }
+}
+
+.animate-pulse-border {
+  animation: pulse-border 2s infinite;
+}
+
+/* Additional Pixel Art Shadow Classes */
+.shadow-pixel-xl {
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* NFT Mint Results Grid Styling */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div {
+  position: relative;
+  background: rgba(30, 30, 44, 0.7);
+  background-image: linear-gradient(to bottom, rgba(49, 46, 129, 0.6), rgba(30, 27, 75, 0.8));
+  transition: all 0.3s ease;
+  transform-origin: center;
+  border: none;
+  padding: 10px;
+  border: 4px solid transparent;
+  border-image: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #312e81 100%) 1;
+  box-shadow: 
+    4px 4px 0 rgba(0, 0, 0, 0.8),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.2);
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    6px 6px 0 rgba(0, 0, 0, 0.7),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.3),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Rank-specific card borders */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-pink-500) {
+  border-image: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #9d174d 100%) 1;
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-yellow-500) {
+  border-image: linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #b45309 100%) 1;
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-purple-400) {
+  border-image: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%) 1;
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-blue-400) {
+  border-image: linear-gradient(135deg, #93c5fd 0%, #3b82f6 50%, #1d4ed8 100%) 1;
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-green-400) {
+  border-image: linear-gradient(135deg, #4ade80 0%, #16a34a 50%, #166534 100%) 1;
+}
+
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div:has(.text-gray-400) {
+  border-image: linear-gradient(135deg, #94a3b8 0%, #64748b 50%, #334155 100%) 1;
+}
+
+/* NFT card image container */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .relative.h-20.w-20 {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0; /* Pixel art style */
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  border: 2px solid;
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-left-color: rgba(255, 255, 255, 0.3);
+  border-right-color: rgba(0, 0, 0, 0.3);
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.2);
+  transform: scale(1.2);
+  margin: 1rem auto;
+  padding: 2px;
+}
+
+/* Card rank text styling */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .text-center.font-bold {
+  font-family: var(--font-press-start-2p), monospace;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  margin-top: 0.5rem;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.7);
+}
+
+/* NFT card ID text */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .text-sm.font-semibold.text-white {
+  font-family: var(--font-vt323), monospace;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7);
+  margin: 0.5rem 0;
+}
+
+/* NFT expiration text */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .text-sm.text-indigo-300 {
+  font-family: var(--font-vt323), monospace;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 2px 6px;
+  display: inline-block;
+}
+
+/* NFT points rate box */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .text-xs.mt-1 {
+  padding: 3px 6px;
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-left-color: rgba(255, 255, 255, 0.3);
+  border-right-color: rgba(0, 0, 0, 0.3);
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* "BEST" badge */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .absolute.top-0.right-0 .bg-yellow-500 {
+  transform: rotate(12deg);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7);
+  border: 2px solid;
+  border-top-color: #fde68a;
+  border-left-color: #fde68a;
+  border-right-color: #ca8a04;
+  border-bottom-color: #ca8a04;
+  font-family: var(--font-pixelify), sans-serif;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+/* Mint Results Section Container */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 {
+  position: relative;
+  background-image: 
+    linear-gradient(to bottom, rgba(49, 46, 129, 0.9), rgba(15, 23, 42, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236366f1' fill-opacity='0.2'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3Ccircle cx='13' cy='13' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100%, 20px 20px;
+  overflow: hidden;
+  border-width: 4px;
+  border-style: solid;
+  border-image: linear-gradient(to bottom right, #818cf8, #4f46e5, #312e81) 1;
+  box-shadow: 
+    0 0 15px rgba(99, 102, 241, 0.2),
+    0 0 30px rgba(99, 102, 241, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Mint Results Title */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 h2 {
+  font-family: var(--font-press-start-2p), monospace;
+  font-size: 2rem;
+  background: linear-gradient(to right, #ec4899, #c026d3, #8b5cf6);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.5px;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Title yellow span */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 h2 .text-yellow-300 {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Title underline */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  height: 4px;
+  background: linear-gradient(to right, transparent, #8b5cf6, transparent);
+}
+
+/* Clear Results Button */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 button.mt-8 {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  z-index: 1;
+  font-family: var(--font-pixelify), sans-serif;
+  letter-spacing: 1px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 button.mt-8:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #4f46e5, #818cf8);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 button.mt-8:hover:before {
+  opacity: 1;
+}
+
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 button.mt-8:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4);
+}
+
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 button.mt-8:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* NFT card image */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div img {
+  image-rendering: pixelated;
+  transition: transform 0.3s ease;
+}
+
+/* NFT card best badge position */
+.grid-cols-1.sm\\:grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4.xl\\:grid-cols-5 > div .absolute.top-0.right-0 {
+  z-index: 2;
+}
+
+/* NFT Mint Results Card Styling */
+.nft-card {
+  position: relative;
+  background: rgba(30, 30, 44, 0.7) !important;
+  background-image: linear-gradient(to bottom, rgba(49, 46, 129, 0.6), rgba(30, 27, 75, 0.8)) !important;
+  transition: all 0.3s ease !important;
+  transform-origin: center !important;
+  padding: 4px !important;
+  border: 2px solid transparent !important;
+  border-image: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #312e81 100%) 1 !important;
+  box-shadow: 
+    4px 4px 0 rgba(0, 0, 0, 0.8),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.2) !important;
+  max-width: 240px !important;
+}
+
+.nft-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 
+    6px 6px 0 rgba(0, 0, 0, 0.7),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.3),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Rank-specific card borders */
+.nft-card:has(.text-pink-500) {
+  border-image: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #9d174d 100%) 1 !important;
+}
+
+.nft-card:has(.text-yellow-500) {
+  border-image: linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #b45309 100%) 1 !important;
+}
+
+.nft-card:has(.text-purple-400) {
+  border-image: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%) 1 !important;
+}
+
+.nft-card:has(.text-blue-400) {
+  border-image: linear-gradient(135deg, #93c5fd 0%, #3b82f6 50%, #1d4ed8 100%) 1 !important;
+}
+
+.nft-card:has(.text-green-400) {
+  border-image: linear-gradient(135deg, #4ade80 0%, #16a34a 50%, #166534 100%) 1 !important;
+}
+
+.nft-card:has(.text-gray-400) {
+  border-image: linear-gradient(135deg, #94a3b8 0%, #64748b 50%, #334155 100%) 1 !important;
+}
+
+/* NFT card image container */
+.nft-card .relative.h-20.w-20 {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 0 !important; /* Pixel art style */
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5) !important;
+  border: 2px solid !important;
+  border-top-color: rgba(255, 255, 255, 0.3) !important;
+  border-left-color: rgba(255, 255, 255, 0.3) !important;
+  border-right-color: rgba(0, 0, 0, 0.3) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3) !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 68px !important;
+  max-height: 68px !important;
+  margin: 0.5rem auto !important;
+  padding: 2px !important;
+}
+
+/* Card rank text styling */
+.nft-card .text-center.font-bold {
+  font-family: var(--font-press-start-2p), monospace !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.5px !important;
+  margin-top: 0.25rem !important;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* NFT card ID text */
+.nft-card .text-sm.font-semibold.text-white {
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7) !important;
+  margin: 0.25rem 0 !important;
+}
+
+/* NFT expiration text */
+.nft-card .text-sm.text-indigo-300 {
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.25rem !important;
+  background: rgba(79, 70, 229, 0.1) !important;
+  padding: 2px 4px !important;
+  display: inline-block !important;
+}
+
+/* NFT points rate box */
+.nft-card .text-xs.mt-1 {
+  padding: 3px 6px !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-top-color: rgba(255, 255, 255, 0.3) !important;
+  border-left-color: rgba(255, 255, 255, 0.3) !important;
+  border-right-color: rgba(0, 0, 0, 0.3) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* "BEST" badge */
+.nft-card .absolute.top-0.right-0 .bg-yellow-500 {
+  transform: rotate(12deg) !important;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7) !important;
+  border: 2px solid !important;
+  border-top-color: #fde68a !important;
+  border-left-color: #fde68a !important;
+  border-right-color: #ca8a04 !important;
+  border-bottom-color: #ca8a04 !important;
+  font-family: var(--font-pixelify), sans-serif !important;
+  letter-spacing: 1px !important;
+  padding: 3px 8px !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important;
+}
+
+/* Mint Results Container */
+.box-border.w-full.max-w-full.mx-auto.mt-8.bg-gray-900 {
+  position: relative !important;
+  background-image: 
+    linear-gradient(to bottom, rgba(49, 46, 129, 0.9), rgba(15, 23, 42, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236366f1' fill-opacity='0.2'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3Ccircle cx='13' cy='13' r='1'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-size: 100%, 20px 20px !important;
+  overflow: hidden !important;
+  border-width: 4px !important;
+  border-style: solid !important;
+  border-image: linear-gradient(to bottom right, #818cf8, #4f46e5, #312e81) 1 !important;
+  box-shadow: 
+    0 0 15px rgba(99, 102, 241, 0.2),
+    0 0 30px rgba(99, 102, 241, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Mint Results Title */
+.mint-results h2 {
+  font-family: var(--font-press-start-2p), monospace !important;
+  font-size: 2rem !important;
+  background: linear-gradient(to right, #ec4899, #c026d3, #8b5cf6) !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5) !important;
+  letter-spacing: -0.5px !important;
+  padding-bottom: 0.5rem !important;
+  margin-bottom: 1.5rem !important;
+  position: relative !important;
+}
+
+/* Title yellow span */
+.mint-results h2 .text-yellow-300 {
+  background: linear-gradient(to right, #fbbf24, #f59e0b) !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Title underline */
+.mint-results h2:after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 25% !important;
+  right: 25% !important;
+  height: 4px !important;
+  background: linear-gradient(to right, transparent, #8b5cf6, transparent) !important;
+}
+
+/* Clear Results Button */
+.mint-results button.mt-8 {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s !important;
+  z-index: 1 !important;
+  font-family: var(--font-pixelify), sans-serif !important;
+  letter-spacing: 1px !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4) !important;
+  background: linear-gradient(to bottom, #4f46e5, #4338ca) !important;
+  color: #fef3c7 !important;
+  border: 3px solid !important;
+  border-top-color: #818cf8 !important;
+  border-left-color: #818cf8 !important;
+  border-right-color: #312e81 !important;
+  border-bottom-color: #312e81 !important;
+  font-weight: bold !important;
+  font-size: 1.125rem !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.mint-results button.mt-8:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4) !important;
+  background: linear-gradient(to bottom, #4338ca, #3730a3) !important;
+}
+
+.mint-results button.mt-8:active {
+  transform: translate(0, 0) !important;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Grid styling */
+.mint-results .grid {
+  margin-top: 2rem !important;
+  grid-gap: 1.5rem !important;
+}
+
+/* NFT Ranks & Benefits Section Styling */
+.nft-ranks-section {
+  position: relative;
+  background-image: 
+    linear-gradient(to bottom, rgba(49, 46, 129, 0.9), rgba(17, 24, 39, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234338ca' fill-opacity='0.15' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3Ccircle cx='13' cy='13' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.3), inset 0 0 8px rgba(67, 56, 202, 0.3);
+  overflow: hidden;
+}
+
+.nft-ranks-section:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4338ca, #6366f1, #4338ca);
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.nft-ranks-section:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), transparent);
+}
+
+.nft-ranks-section .rank-card {
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nft-ranks-section .rank-card:before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  background: linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.1) 50%);
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.nft-ranks-section .rank-card:hover:before {
+  opacity: 0.5;
+}
+
+.nft-ranks-section .rank-card h4 {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+}
+
+/* Individual rank card styling */
+.nft-ranks-section .ur-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, transparent 50%, rgba(236, 72, 153, 0.7) 50%);
+  z-index: 1;
+}
+
+.nft-ranks-section .ssr-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, transparent 50%, rgba(234, 179, 8, 0.7) 50%);
+  z-index: 1;
+}
+
+.nft-ranks-section .sr-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, transparent 50%, rgba(167, 139, 250, 0.7) 50%);
+  z-index: 1;
+}
+
+.nft-ranks-section .r-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, transparent 50%, rgba(96, 165, 250, 0.7) 50%);
+  z-index: 1;
+}
+
+.nft-ranks-section .uc-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, transparent 50%, rgba(74, 222, 128, 0.7) 50%);
+  z-index: 1;
+}
+
+/* Define bg-grid-pattern class */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Font specific class for pixel art style */
+.font-press-start {
+  font-family: 'Press Start 2P', 'VT323', monospace;
+  letter-spacing: -0.5px;
+  font-size: 85%;
+  line-height: 1.5;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Enhanced text shadow for pixel art style */
+.text-shadow-pixel {
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.7),
+    3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Special animation for rank cards */
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.nft-ranks-section .rank-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  z-index: 10;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.nft-ranks-section .rank-card:hover h4:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite;
+  z-index: -1;
+}
+
+/* Add special hover effects for rank indicator square */
+.nft-ranks-section .rank-card:hover .w-5 {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px currentColor;
+  transition: all 0.3s ease;
+}
+
+/* Ranks Toggle Button Styling */
+.ranks-toggle-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.ranks-toggle-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(79, 70, 229, 0.6), rgba(67, 56, 202, 0.8));
+  z-index: -1;
+}
+
+.ranks-toggle-btn:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+}
+
+.ranks-toggle-btn:hover:after {
+  left: 150%;
+  transition: all 0.75s ease;
+}
+
+.ranks-toggle-btn span.relative {
+  text-shadow: 
+    0 2px 0 rgba(0, 0, 0, 0.9),
+    0 4px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Hover effect defined previously */
+
+/* Add pixel pattern to rank cards */
+.nft-ranks-section .rank-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+.nft-ranks-section .ur-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(244, 114, 182, 0.15), rgba(0, 0, 0, 0.2)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ec4899' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+.nft-ranks-section .ssr-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(234, 179, 8, 0.15), rgba(0, 0, 0, 0.2)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23eab308' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+.nft-ranks-section .sr-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(167, 139, 250, 0.15), rgba(0, 0, 0, 0.2)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23a78bfa' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+.nft-ranks-section .r-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.15), rgba(0, 0, 0, 0.2)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2360a5fa' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+.nft-ranks-section .uc-card {
+  background-image: 
+    linear-gradient(to bottom, rgba(74, 222, 128, 0.15), rgba(0, 0, 0, 0.2)),
+    url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234ade80' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 5v1H0V0h5z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 6px 6px;
+}
+
+/* Custom header styling for NFT Ranks & Benefits section */
+.nft-ranks-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 2.25rem !important;
+  line-height: 1.5 !important;
+  letter-spacing: -0.25px !important;
+  color: white !important;
+  background: linear-gradient(to right, #fde047, #facc15, #eab308) !important;
+  background-clip: text !important;
+  /* Removed shadow effect */
+  transform: translateZ(0) !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-block !important;
+}
+
+/* ปรับแต่งส่วน FOOTER ให้สวยงามมากขึ้น */
+.footer-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 2rem !important;
+}
+
+footer.font-pixel {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+footer.font-pixel:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-image: 
+    radial-gradient(#8A2BE2 1px, transparent 1px),
+    radial-gradient(#8A2BE2 1px, transparent 1px) !important;
+  background-size: 30px 30px !important;
+  background-position: 0 0, 15px 15px !important;
+  opacity: 0.03 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+footer .py-20 {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+footer .h-4.bg-gradient-to-r {
+  height: 6px !important;
+  position: relative !important;
+}
+
+footer .h-2.bg-pixel-accent {
+  height: 3px !important;
+  position: relative !important;
+}
+
+footer .text-4xl {
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.8) !important;
+  filter: drop-shadow(0 0 8px rgba(240,230,140,0.4)) !important;
+  letter-spacing: 2px !important;
+}
+
+/* Enhance the social media icons with glow effect */
+footer .w-16.h-16 {
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+footer .w-16.h-16:after {
+  content: '' !important;
+  position: absolute !important;
+  top: -2px !important;
+  left: -2px !important;
+  right: -2px !important;
+  bottom: -2px !important;
+  border: 2px solid transparent !important;
+  opacity: 0 !important;
+  transition: all 0.3s ease !important;
+  z-index: -1 !important;
+}
+
+footer .w-16.h-16:hover {
+  transform: translateY(-6px) !important;
+  filter: brightness(1.1) !important;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.5), 6px 6px 0 rgba(0,0,0,0.8) !important;
+}
+
+footer .w-16.h-16:hover:after {
+  opacity: 1 !important;
+  border-color: rgba(240,230,140,0.3) !important;
+  box-shadow: 0 0 10px rgba(240,230,140,0.5) !important;
+}
+
+/* Animated background for the footer section */
+footer .bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, 
+    #301934, 
+    rgba(48, 25, 52, 0.95),
+    rgba(30, 15, 35, 0.98),
+    #1a0d1e) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+footer .bg-gradient-to-b:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 100px !important;
+  background: linear-gradient(to bottom, 
+    rgba(138, 43, 226, 0.15), 
+    transparent) !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+}
+
+/* Fancy pixel corners for sections */
+footer .w-full.items-center.py-6 {
+  position: relative !important;
+}
+
+footer .w-full.items-center.py-6:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #F0E68C !important;
+  opacity: 0.7 !important;
+}
+
+footer .w-full.items-center.py-6:after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 5px !important;
+  right: 5px !important;
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #F0E68C !important;
+  opacity: 0.7 !important;
+}
+
+/* Fancy buttons in the footer */
+footer .px-8.py-4 {
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5) !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+footer .px-8.py-4:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(255,255,255,0.3), 
+    transparent) !important;
+  transition: all 0.5s ease !important;
+}
+
+footer .px-8.py-4:hover:before {
+  left: 100% !important;
+}
+
+/* Responsive footer at mobile view */
+@media (max-width: 768px) {
+  footer .text-4xl {
+    font-size: 2.5rem !important;
+  }
+  
+  footer .w-16.h-16 {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+  }
+  
+  footer .space-x-7 {
+    gap: 1rem !important;
+  }
+}
+
+/* Add nft-grid class for NFT grid styling without breaking the footer */
+.nft-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 30px !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 20px auto !important;
+}
+
+/* Enhanced Footer Social Icons */
+footer .social-icon-link div {
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8) !important;
+  position: relative !important;
+  overflow: visible !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+footer .social-icon-link div:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%) !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  z-index: 0 !important;
+}
+
+footer .social-icon-link:hover div:before {
+  opacity: 1 !important;
+}
+
+footer .social-icon-link svg {
+  position: relative !important;
+  z-index: 1 !important;
+  transition: all 0.3s ease !important;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+footer .social-icon-link:hover svg {
+  transform: scale(1.15) !important;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7)) !important;
+}
+
+footer .social-icon-link:hover div {
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Animated glow effect on hover */
+@keyframes socialIconGlow {
+  0% { box-shadow: 0 0 0 0 rgba(240, 230, 140, 0.4); }
+  70% { box-shadow: 0 0 10px 5px rgba(240, 230, 140, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(240, 230, 140, 0); }
+}
+
+footer .social-icon-link:hover div {
+  animation: socialIconGlow 2s infinite !important;
+}
+
+/* Social icons responsive design */
+@media (max-width: 640px) {
+  footer .social-icon-link div {
+    width: 4rem !important;
+    height: 4rem !important;
+  }
+  
+  footer .social-icon-link svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  footer .flex.space-x-10 {
+    gap: 1rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  footer .social-icon-link div {
+    width: 4.5rem !important;
+    height: 4.5rem !important;
+  }
+  
+  footer .social-icon-link svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+/* Add a pixel-perfect shine effect */
+footer .social-icon-link div:after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent) !important;
+  transform: skewX(-20deg) !important;
+  transition: transform 0.5s ease !important;
+  z-index: 1 !important;
+}
+
+footer .social-icon-link:hover div:after {
+  left: 150% !important;
+  transition: 0.7s ease-in-out !important;
+}
+
+/* Modernize the footer social section title */
+footer h3.text-2xl.font-vt323 {
+  font-size: 2.25rem !important;
+  background: linear-gradient(to right, #F0E68C, #DAA520) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  position: relative !important;
+  display: inline-block !important;
+  letter-spacing: 3px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+footer h3.text-2xl.font-vt323:after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -6px !important;
+  left: 25% !important;
+  right: 25% !important;
+  height: 3px !important;
+  background: linear-gradient(to right, transparent, #F0E68C, transparent) !important;
+}
+
+/* Animation for the JOIN OUR COMMUNITY title */
+@keyframes titleGlow {
+  0% { text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 5px rgba(240, 230, 140, 0.3); }
+  50% { text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 15px rgba(240, 230, 140, 0.7); }
+  100% { text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 5px rgba(240, 230, 140, 0.3); }
+}
+
+footer .animated-title {
+  animation: titleGlow 3s ease-in-out infinite !important;
+  position: relative !important;
+  display: inline-block !important;
+  padding: 0.5rem 1.5rem !important;
+  border: 3px solid !important;
+  border-image: linear-gradient(to right, #BA68C8, #F0E68C, #BA68C8) 1 !important;
+  background: linear-gradient(to right, rgba(138, 43, 226, 0.6), rgba(75, 0, 130, 0.8)) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  transform: perspective(500px) rotateX(5deg) !important;
+  font-size: 2rem !important;
+  letter-spacing: 3px !important;
+  text-shadow: 3px 3px 0 #000 !important;
+}
+
+footer .animated-title:before, 
+footer .animated-title:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #F0E68C !important;
+  z-index: 2 !important;
+}
+
+footer .animated-title:before {
+  top: -4px !important;
+  left: -4px !important;
+}
+
+footer .animated-title:after {
+  bottom: -4px !important;
+  right: -4px !important;
+}
+
+/* Logo title animation and styling */
+footer .logo-title {
+  background: linear-gradient(to right, #F0E68C, #DAA520, #F0E68C) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-size: 200% auto !important;
+  animation: gradientText 6s linear infinite !important;
+  position: relative !important;
+  padding: 0.5rem 1.5rem !important;
+  border: 4px solid !important;
+  border-image: linear-gradient(135deg, #BA68C8, #F0E68C, #BA68C8) 1 !important; 
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+  text-shadow: none !important;
+  display: inline-block !important;
+  font-weight: bold !important;
+  filter: drop-shadow(0 4px 0px rgba(0, 0, 0, 0.8)) !important;
+}
+
+@keyframes gradientText {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+footer .logo-title:before, 
+footer .logo-title:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 10px !important;
+  height: 10px !important;
+  background-color: #F0E68C !important;
+  z-index: 2 !important;
+}
+
+footer .logo-title:before {
+  top: -6px !important;
+  left: -6px !important;
+}
+
+footer .logo-title:after {
+  bottom: -6px !important;
+  right: -6px !important;
+}
+
+/* Tagline styling */
+footer .tagline-text {
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.5rem !important;
+  line-height: 1.5 !important;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4) !important;
+  padding: 0.5rem 1rem !important;
+  background: rgba(138, 43, 226, 0.15) !important;
+  border-radius: 4px !important;
+  border-left: 3px solid #F0E68C !important;
+  letter-spacing: 1px !important;
+  max-width: 300px !important;
+  margin: 0 auto !important;
+  position: relative !important;
+}
+
+footer .tagline-text:after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -8px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 70% !important;
+  height: 2px !important;
+  background: linear-gradient(to right, transparent, rgba(240, 230, 140, 0.5), transparent) !important;
+}
+
+/* Middle section enhancements */
+footer .animated-title-center {
+  animation: titleGlow 3s ease-in-out infinite !important;
+  position: relative !important;
+  display: inline-block !important;
+  padding: 0.5rem 1.5rem !important;
+  border: 3px solid !important;
+  border-image: linear-gradient(to right, #BA68C8, #F0E68C, #BA68C8) 1 !important;
+  background: linear-gradient(to right, rgba(138, 43, 226, 0.6), rgba(75, 0, 130, 0.8)) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  transform: perspective(500px) rotateX(5deg) !important;
+  font-size: 1.75rem !important;
+  letter-spacing: 3px !important;
+  text-shadow: 3px 3px 0 #000 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+footer .animated-title-center:before, 
+footer .animated-title-center:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #F0E68C !important;
+  z-index: 2 !important;
+}
+
+footer .animated-title-center:before {
+  top: -4px !important;
+  left: -4px !important;
+}
+
+footer .animated-title-center:after {
+  bottom: -4px !important;
+  right: -4px !important;
+}
+
+/* Network button container styling */
+footer .network-button-container {
+  position: relative !important;
+  padding: 10px !important;
+  background: rgba(138, 43, 226, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+  max-width: 100% !important;
+}
+
+footer .network-button-container:hover {
+  transform: scale(1.03) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+footer .network-button-container:before, 
+footer .network-button-container:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #F0E68C !important;
+  z-index: 2 !important;
+}
+
+footer .network-button-container:before {
+  top: 0 !important;
+  left: 0 !important;
+}
+
+footer .network-button-container:after {
+  bottom: 0 !important;
+  right: 0 !important;
+}
+
+/* Faucet button styling */
+footer .faucet-button {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 0 !important; /* Pixel art style */
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5) !important;
+  letter-spacing: 2px !important;
+  min-width: 200px !important;
+}
+
+footer .faucet-button:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+  transform: skewX(-20deg) !important;
+  transition: all 0.5s ease !important;
+  z-index: 1 !important;
+}
+
+footer .faucet-button:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(to bottom, #FFC125, #EEB422) !important;
+}
+
+footer .faucet-button:hover:before {
+  left: 150% !important;
+  transition: 0.7s ease-in-out !important;
+}
+
+/* Responsive alignment fixes for footer sections */
+@media (max-width: 768px) {
+  footer .grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3rem !important;
+  }
+
+  footer .logo-title {
+    font-size: 3rem !important;
+    padding: 0.4rem 1rem !important;
+  }
+
+  footer .faucet-button {
+    width: 85% !important;
+    max-width: 250px !important;
+  }
+}
+
+/* Enhanced copyright section styling */
+footer .mt-16.pt-10.pb-12 {
+  position: relative !important;
+  margin-top: 3rem !important;
+}
+
+footer .mt-16.pt-10.pb-12:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 25% !important;
+  right: 25% !important;
+  height: 1px !important;
+  background: linear-gradient(to right, transparent, #BA68C8, transparent) !important;
+}
+
+footer .mt-16.pt-10.pb-12 p {
+  font-size: 1rem !important;
+  font-family: var(--font-vt323), monospace !important;
+  letter-spacing: 1px !important;
+  line-height: 1.6 !important;
+  color: rgba(230, 230, 250, 0.8) !important;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+footer .mt-16.pt-10.pb-12 p .opacity-75 {
+  display: inline-block !important;
+  margin-top: 0.5rem !important;
+  padding: 0.25rem 0.5rem !important;
+  background-color: rgba(138, 43, 226, 0.1) !important;
+  border-radius: 4px !important;
+  color: #F0E68C !important;
+}
+
+/* Buttons container styling */
+footer .buttons-container {
+  margin-top: 1rem !important;
+  background: rgba(138, 43, 226, 0.1) !important;
+  padding: 1.5rem !important;
+  border-radius: 8px !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid rgba(138, 43, 226, 0.2) !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+footer .buttons-container:before, 
+footer .buttons-container:after {
+  content: '' !important;
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #F0E68C !important;
+  z-index: 2 !important;
+}
+
+footer .buttons-container:before {
+  top: -4px !important;
+  left: -4px !important;
+}
+
+footer .buttons-container:after {
+  bottom: -4px !important;
+  right: -4px !important;
+}
+
+/* Network button wrapper styling */
+footer .network-button-wrapper {
+  position: relative !important;
+}
+
+/* Override AddNetworkButton styles to match faucet button */
+footer .network-button-wrapper button {
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  color: #301934 !important;
+  border: 3px solid black !important;
+  border-radius: 0 !important; /* Pixel art style */
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5) !important;
+  padding: 0.75rem 1.5rem !important;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.7) !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1.125rem !important;
+  letter-spacing: 2px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+footer .network-button-wrapper button:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(to bottom, #FFC125, #EEB422) !important;
+}
+
+/* Add the shine effect to the Network button */
+footer .network-button-wrapper button:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+  transform: skewX(-20deg) !important;
+  transition: all 0.5s ease !important;
+  z-index: 1 !important;
+}
+
+footer .network-button-wrapper button:hover:before {
+  left: 150% !important;
+  transition: 0.7s ease-in-out !important;
+}
+
+/* Make sure both buttons are similar in size */
+footer .faucet-button {
+  padding: 0.75rem 1.5rem !important;
+  min-width: 150px !important;
+  font-size: 1.125rem !important;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+  footer .buttons-container {
+    flex-direction: column !important;
+    padding: 1.25rem 0.75rem !important;
+    gap: 1.25rem !important;
+  }
+  
+  footer .network-button-wrapper button,
+  footer .faucet-button {
+    min-width: 200px !important;
+    width: 100% !important;
+  }
+}
+
+/* Compact buttons container */
+footer .buttons-container-compact {
+  margin-top: 1rem !important;
+  background: rgba(138, 43, 226, 0.1) !important;
+  padding: 1rem !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(138, 43, 226, 0.2) !important;
+  position: relative !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+}
+
+/* Shared button style */
+footer .compact-button {
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  color: #301934 !important;
+  border: 2px solid black !important;
+  border-radius: 0 !important; /* Pixel art style */
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7) !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1rem !important;
+  letter-spacing: 1px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 120px !important;
+  width: 120px !important;
+  height: 36px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  cursor: pointer !important;
+}
+
+footer .compact-button:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(to bottom, #FFC125, #EEB422) !important;
+}
+
+/* Add the shine effect */
+footer .compact-button:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+  transform: skewX(-20deg) !important;
+  transition: all 0.3s ease !important;
+  z-index: 1 !important;
+}
+
+footer .compact-button:hover:before {
+  left: 150% !important;
+  transition: 0.5s ease-in-out !important;
+}
+
+/* Make sure text is on top of the shine effect */
+footer .compact-button span,
+footer .compact-button {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Override AddNetworkButton to match compact button */
+footer .network-button-compact button {
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  color: #301934 !important;
+  border: 2px solid black !important;
+  border-radius: 0 !important; /* Pixel art style */
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7) !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 1rem !important;
+  letter-spacing: 1px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 120px !important;
+  width: 120px !important;
+  height: 36px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+footer .network-button-compact button:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(to bottom, #FFC125, #EEB422) !important;
+}
+
+/* Add the shine effect to Network button */
+footer .network-button-compact button:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 50% !important;
+  height: 100% !important;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+  transform: skewX(-20deg) !important;
+  transition: all 0.3s ease !important;
+  z-index: 1 !important;
+}
+
+footer .network-button-compact button:hover:before {
+  left: 150% !important;
+  transition: 0.5s ease-in-out !important;
+}
+
+/* Make text appear on top of shine effect */
+footer .network-button-compact button span {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Force buttons to be exactly the same size */
+footer .buttons-container-compact {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Base button dimensions - apply to both buttons */
+footer .compact-button,
+footer .network-button-compact button {
+  min-width: 120px !important;
+  width: 120px !important;
+  max-width: 120px !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+/* Ensure wrapper divs don't affect button sizing */
+footer .network-button-compact {
+  width: 120px !important;
+  height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Ensure a button doesn't have additional padding/margin */
+footer .network-button-compact button {
+  width: 100% !important;
+}
+
+/* Fix any button content spacing */
+footer .compact-button span,
+footer .network-button-compact button span {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Override any potential button text differences */
+footer .compact-button,
+footer .network-button-compact button {
+  font-size: 0.9rem !important;
+  letter-spacing: 1px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* Reset the compact-button styling */
+footer .compact-button {
+  padding: 0.4rem 0.8rem !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  color: #301934 !important;
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  border: 2px solid black !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) !important;
+  min-width: 120px !important;
+  width: 120px !important;
+  height: 36px !important;
+  box-sizing: border-box !important;
+}
+
+/* Override any AddNetworkButton styles */
+footer .network-button-compact button {
+  padding: 0.4rem 0.8rem !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  color: #301934 !important;
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  border: 2px solid black !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) !important;
+  min-width: 120px !important;
+  width: 120px !important;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  outline: none !important;
+}
+
+/* Precise button size control */
+footer .compact-button,
+footer .network-button-compact button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 120px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  font-family: var(--font-vt323), monospace !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  color: #301934 !important;
+  background: linear-gradient(to bottom, #F0E68C, #DAA520) !important;
+  border: 2px solid black !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  letter-spacing: 1px !important;
+}
+
+/* Professional social media icons styling */
+footer .social-icons-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  margin-top: 1.5rem !important;
+  gap: 2rem !important;
+}
+
+footer .social-icon {
+  position: relative !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  background: #F0E68C !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3) !important;
+  border: 3px solid #301934 !important;
+  padding: 0.75rem !important;
+  color: #301934 !important;
+  cursor: pointer !important;
+}
+
+/* Fix social icon hover effect to make it clickable */
+footer .social-icon-link div:after {
+  display: none !important; /* Remove the shine effect that blocks clicks */
+}
+
+footer .social-icon-link:hover div:after {
+  display: none !important;
+}
+
+footer .social-icon-link svg {
+  position: relative !important;
+  z-index: 2 !important; /* Ensure SVG is above any effects */
+}
+
+/* Make sure the icons are clickable */
+footer .social-icon {
+  pointer-events: auto !important;
+}
+
+footer .social-icon-link {
+  pointer-events: auto !important;
 }

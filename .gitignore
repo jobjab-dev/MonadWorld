@@ -41,3 +41,28 @@ Thumbs.db
 # ───────── Docker / CI  ──────────────
 docker-compose.override.yml
 *.local.yml
+
+# Sensitive admin files
+admin-tool.html
+ethers-*.umd.min.js
+contract-address.txt
+abi-admin/
+
+# Environment & Keys  
+.env*
+*.key
+*-key.txt
+wallet.json
+keystore/
+
+# Hardhat sensitive
+hardhat.config.local.ts
+deploy-config.json
+deployment-info.json
+
+# Logs that might contain keys
+*.log
+debug.log
+error.log
+
+how-to/

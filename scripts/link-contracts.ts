@@ -3,9 +3,9 @@ import { ethers, run } from "hardhat";
 async function main() {
   await run("compile");
 
-  const game = await ethers.getContractAt("LilnadNFT", process.env.GAME_ADDR!);
-  const love = await ethers.getContractAt("LoveToken", process.env.LOVE_ADDR!);
-  const dist = process.env.DIST_ADDR!;
+  const game = await ethers.getContractAt("LilnadNFT", process.env.GAME_ADDRESS!);
+  const love = await ethers.getContractAt("LoveToken", process.env.LOVE_ADDRESS!);
+  const dist = process.env.DIST_ADDRESS!;
 
   console.log("setDistributor tx:",
     await (await game.setDistributor(dist)).wait());

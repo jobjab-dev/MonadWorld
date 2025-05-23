@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  important: true,
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -36,7 +37,36 @@ module.exports = {
       boxShadow: {
         'pixel': '4px 4px 0px #000', // Example: simple pixel shadow
         'pixel-lg': '6px 6px 0px #000',
-      }
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'shine': 'shine 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'twinkle': 'twinkle 4s ease infinite',
+        'fadeIn': 'fadeIn 0.3s ease-in-out',
+        'scaleIn': 'scaleIn 0.3s ease-out',
+      },
+      keyframes: {
+        pulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' },
+        },
+        shine: {
+          '0%': { transform: 'translateX(-100%)' },
+          '20%, 100%': { transform: 'translateX(100%)' },
+        },
+        twinkle: {
+          '0%, 100%': { opacity: '0.2' },
+          '50%': { opacity: '0.8' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
     },
   },
   plugins: [],

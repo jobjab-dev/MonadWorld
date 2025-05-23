@@ -1,7 +1,7 @@
 import { ethers, run } from "hardhat";
 
-const GAME = "0xFD1819dAeD07E052C5f9C635EC29F233f12552C4";   // ใส่ address ที่ได้จากขั้นตอน 1
-const LOVE = "0x5FbDB2315678afecb367f032d93F642f64180aa3";   // ใส่ address จากขั้นตอน 2
+const GAME = "0x48689be5D36ae3B94f5f2Dc8FD372A0e46A20933";   // ใส่ address ที่ได้จากขั้นตอน 1
+const LOVE = "0xc68ad76b2E240f020903495D9a9855cc035fB966";   // ใส่ address จากขั้นตอน 2
 
 async function main() {
   await run("compile");

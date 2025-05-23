@@ -1,0 +1,49 @@
+# MonadWorld Admin Tool Protection
+# เพิ่มการป้องกันพิเศษสำหรับ admin-tool.html
+
+<Files "admin-tool.html">
+    # บังคับใช้ HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # จำกัดการเข้าถึงตาม IP (ให้แก้ไข IP ตามต้องการ)
+    # ตัวอย่าง: จำกัดให้เฉพาะ localhost และ IP ของคุณ
+    Order Deny,Allow
+    Deny from all
+    Allow from 127.0.0.1
+    Allow from ::1
+    # Allow from YOUR_IP_HERE
+    
+    # เพิ่มหัวข้อความปลอดภัย
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.ethers.io; style-src 'self' 'unsafe-inline'"
+    
+    # บังคับ authentication (ถ้าต้องการ - ต้องสร้าง .htpasswd)
+    # AuthType Basic
+    # AuthName "MonadWorld Admin Access"
+    # AuthUserFile /path/to/.htpasswd
+    # Require valid-user
+</Files>
+
+# ป้องกันการเข้าถึงไฟล์ .env
+<Files ".env*">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# ป้องกันการเข้าถึงไฟล์ที่มี private key
+<FilesMatch "\.(key|pem|p12|pfx)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ป้องกันการเข้าถึง node_modules
+RewriteEngine On
+RewriteRule ^node_modules/ - [F,L]
+
+# ป้องกันการแสดง directory listing
+Options -Indexes 

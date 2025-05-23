@@ -8,6 +8,8 @@ import { ethers, Contract, utils as ethersUtils, BigNumber } from 'ethers';
 import cron from 'cron';
 import { startIndexer } from './indexer';
 import { LILNAD_NFT_CONTRACT_ADDRESS, LILNAD_NFT_ABI } from './config';
+import { initializeRankDataCache, isRankDataCacheInitialized, rankDataCache, RankDataCacheEntry } from './contractDataCache';
+import { calculateNftScore, NftDbDataForScore } from './utils/scoreCalculator';
 
 // --- CONFIG DOTENV TO LOAD .env.local FROM BACKEND ROOT ---
 const envPath = path.resolve(__dirname, '../.env.local');
@@ -22,12 +24,134 @@ console.log('RPC_URL (from .env.local via process.env for provider):', process.e
 console.log('INDEXER_START_BLOCK (from .env.local via process.env):', process.env.INDEXER_START_BLOCK);
 console.log('FRONTEND_BASE_URL (from .env.local via process.env):', process.env.FRONTEND_BASE_URL);
 console.log('BACKEND_PUBLIC_URL (from .env.local via process.env for constructing metadata URIs):', process.env.BACKEND_PUBLIC_URL);
+console.log('ADMIN_ADDRESSES (from .env.local via process.env):', process.env.ADMIN_ADDRESSES);
 console.log('---------------------------------------------------');
 
+// Admin authentication using Web3 signatures
+const ADMIN_ADDRESSES = (process.env.ADMIN_ADDRESSES || '').toLowerCase().split(',').map(addr => addr.trim()).filter(addr => ethers.utils.isAddress(addr));
+console.log('Loaded Admin Addresses:', ADMIN_ADDRESSES);
+
+// เพิ่ม nonce tracking เพื่อป้องกัน replay attacks
+const usedNonces = new Set<string>();
+const NONCE_EXPIRY = 30 * 1000; // 30 วินาที
+
+// ทำความสะอาด expired nonces ทุก 60 วินาที
+setInterval(() => {
+  const currentTime = Date.now();
+  for (const nonce of usedNonces) {
+    const [timestamp] = nonce.split('-');
+    if (currentTime - parseInt(timestamp) > NONCE_EXPIRY) {
+      usedNonces.delete(nonce);
+    }
+  }
+}, 60000);
+
+function adminAuth(req: any, res: any, next: any) {
+  try {
+    let signature, message, signerAddress, nonce;
+    
+    // สำหรับ GET request ใช้ query parameters
+    if (req.method === 'GET') {
+      signature = req.query.signature;
+      message = req.query.message;
+      signerAddress = req.query.adminAddress || req.query.address;
+      nonce = req.query.nonce;
+    } else {
+      // สำหรับ POST/DELETE ใช้ body
+      signature = req.body.signature;
+      message = req.body.message;
+      signerAddress = req.body.adminAddress || req.body.address;
+      nonce = req.body.nonce;
+    }
+    
+    console.log('🔐 Admin Auth Debug:');
+    console.log('- Method:', req.method);
+    console.log('- Signer address received:', signerAddress);
+    console.log('- Message received:', message);
+    console.log('- Nonce received:', nonce);
+    console.log('- Signature received:', signature?.substring(0, 20) + '...');
+    console.log('- Admin addresses configured:', ADMIN_ADDRESSES);
+    
+    if (!signature || !message || !signerAddress || !nonce) {
+      console.log('❌ Missing required fields');
+      return res.status(401).json({ error: 'Missing signature, message, address, or nonce' });
+    }
+
+    // ตรวจสอบ nonce เพื่อป้องกัน replay attack
+    if (usedNonces.has(nonce)) {
+      console.log('❌ Nonce already used');
+      return res.status(403).json({ error: 'Nonce already used' });
+    }
+
+    // ตรวจสอบ signature และได้ recovered address
+    const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+    console.log('- Recovered address:', recoveredAddress);
+    console.log('- Signer match?', recoveredAddress.toLowerCase() === signerAddress.toLowerCase());
+    
+    if (recoveredAddress.toLowerCase() !== signerAddress.toLowerCase()) {
+      console.log('❌ Signature verification failed');
+      return res.status(403).json({ error: 'Invalid signature' });
+    }
+
+    // ตรวจสอบว่า recovered address (คนที่เซ็น) อยู่ในรายการ admin หรือไม่
+    const isAdmin = ADMIN_ADDRESSES.includes(recoveredAddress.toLowerCase());
+    console.log('- Is signer admin?', isAdmin);
+    if (!isAdmin) {
+      console.log('❌ Signer address not in admin list');
+      return res.status(403).json({ error: 'Address not authorized as admin' });
+    }
+
+    // ตรวจสอบ timestamp ใน message (อายุไม่เกิน 30 วินาที)
+    const timestampMatch = message.match(/MonadWorld Admin Access: (\d+)/);
+    if (!timestampMatch) {
+      console.log('❌ Invalid message format');
+      return res.status(403).json({ error: 'Invalid message format' });
+    }
+    
+    const messageTime = parseInt(timestampMatch[1]);
+    const currentTime = Date.now();
+    const ageMins = (currentTime - messageTime) / (1000 * 60);
+    console.log('- Message age (minutes):', ageMins);
+    
+    if (currentTime - messageTime > 30 * 1000) { // เปลี่ยนเป็น 30 วินาที
+      console.log('❌ Message expired');
+      return res.status(403).json({ error: 'Message expired (max 30 seconds)' });
+    }
+
+    // เพิ่ม nonce ที่ใช้แล้วเข้าไปใน set
+    usedNonces.add(nonce);
+
+    console.log('✅ Admin auth successful');
+    (req as any).adminAddress = recoveredAddress.toLowerCase();
+    next();
+  } catch (error) {
+    console.error('💥 Admin auth error:', error);
+    return res.status(403).json({ error: 'Authentication failed' });
+  }
+}
+
 const app = express();
+
+// ปรับปรุงการตั้งค่า CORS ให้ปลอดภัยกว่า
+const allowedOrigins: string[] = process.env.NODE_ENV === 'production' 
+  ? [
+      'https://www.monadworld.xyz',
+      process.env.FRONTEND_BASE_URL
+    ].filter((origin): origin is string => typeof origin === 'string') // Type guard เพื่อกรองค่า undefined
+  : [
+      'https://www.monadworld.xyz',
+      'http://localhost:3000',
+      'http://localhost:5500', 
+      'http://127.0.0.1:5500',
+      'http://127.0.0.1:3000'
+    ];
+
 app.use(cors({
-  origin: ['https://www.monadworld.xyz', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true,
+  optionsSuccessStatus: 200, // เพิ่มเพื่อรองรับ legacy browsers
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // จำกัด HTTP methods ที่อนุญาต
+  allowedHeaders: ['Content-Type', 'Authorization'] // จำกัด headers ที่อนุญาต
 }));
 app.use(bodyParser.json());
 
@@ -44,8 +168,9 @@ if (LILNAD_NFT_CONTRACT_ADDRESS && contractAbiForEthers.length > 0 && provider) 
   try {
     lilnadNftContract = new ethers.Contract(LILNAD_NFT_CONTRACT_ADDRESS, contractAbiForEthers as ethersUtils.Fragment[], provider);
     console.log('LilnadNFT contract instance created successfully.');
+    initializeRankDataCache(lilnadNftContract);
   } catch (e) {
-    console.error('Error creating LilnadNFT contract instance:', e);
+    console.error('Error creating LilnadNFT contract instance (will also affect RankDataCache init):', e);
   }
 } else {
   console.error('Failed to create LilnadNFT contract instance due to missing components:');
@@ -54,113 +179,166 @@ if (LILNAD_NFT_CONTRACT_ADDRESS && contractAbiForEthers.length > 0 && provider) 
   if (!provider) console.error('- Provider is not initialized.');
 }
 
-// --- RankData Cache ---
-interface RankDataCacheEntry {
-    S: string;
-    T: string;
-}
-const rankDataCache = new Map<number, RankDataCacheEntry>();
-let isRankDataCacheInitialized = false;
+// The following interface and constants are no longer needed as sbtInfo is not directly called for score calculation
+// and passive income logic is different.
+// interface SbtInfoResultType { 
+//     startTimestamp: ethers.BigNumber; 
+//     isDead: boolean; 
+//     rank: number; 
+// }
+// const gameInterface = new ethers.utils.Interface([
+//   'function sbtInfo(uint256) view returns (uint256 startTimestamp,uint256 collected,bool isDead,uint8 rank)'
+// ]);
+// const ACCRUAL_WINDOW_SECS_CONTRACT = 72 * 60 * 60; 
 
-// Define types for contract call results based on ABI
-interface RankDataResultType { S: BigNumber; T: BigNumber; }
-interface SbtInfoResultType { startTimestamp: BigNumber; lastCollect: BigNumber; collected: BigNumber; isDead: boolean; rank: number; }
+// Score calculation is now done directly in API endpoints based on mintTimestamp, rank (for PPS), and lifetime from rankDataCache.
 
-async function initializeRankDataCache() {
-    if (isRankDataCacheInitialized || !lilnadNftContract) return;
-    console.log('Initializing RankData cache...');
-    try {
-        const rankPromises = [];
-        for (let i = 0; i <= 5; i++) { // Assuming ranks 0-5
-            rankPromises.push(
-                lilnadNftContract.rankData(i)
-                    .then((rd: RankDataResultType) => ({rankId: i, S: rd.S.toString(), T: rd.T.toString(), error: false }))
-                    .catch((err: Error) => { 
-                        console.error(`Error fetching rankData for rank ${i}:`, err.message);
-                        return {rankId: i, S: '0', T: '0', error: true }; // Provide default/error state
-                    })
-            );
-        }
-        const results = await Promise.all(rankPromises);
-        results.forEach(r => {
-            if (!r.error) { // Only cache if no error
-                rankDataCache.set(r.rankId, {S: r.S, T: r.T});
-            }
-        });
-        isRankDataCacheInitialized = true;
-        console.log('RankData cache initialized successfully:', rankDataCache);
-        if (results.some(r => r.error)) {
-            console.warn('Some ranks failed to initialize in RankData cache.');
-        }
-    } catch (error) {
-        console.error('Failed to initialize RankData cache (overall error):', error);
-        isRankDataCacheInitialized = false; 
-    }
-}
-// Attempt to initialize cache at startup, but it's okay if it fails (e.g. RPC not ready)
-// It will be retried on first API call that needs it.
-if (lilnadNftContract) {
-    initializeRankDataCache();
-}
-// --- End RankData Cache ---
+// เพิ่ม variable สำหรับเก็บ cache leaderboard
+let leaderboardCache: any = null;
+let leaderboardCacheTimestamp: number = 0;
+const LEADERBOARD_CACHE_TTL = 300; // 5 minutes cache for more frequent updates
 
-// ABI helper for sbtInfo view (returns startTimestamp, collected, isDead, rank)
-const gameInterface = new ethers.utils.Interface([
-  'function sbtInfo(uint256) view returns (uint256 startTimestamp,uint256 collected,bool isDead,uint8 rank)'
-]);
+// Helper function to calculate score (MOVED TO ./utils/scoreCalculator.ts)
+// async function calculateNftScore(nftDb: { mintTimestamp: Date, rank: number, expirationTimestamp: Date | null }, currentServerTimestampS: number, rankDataMap: Map<number, RankDataCacheEntry>): Promise<number> { ... }
 
-// Solidity constant from contract (for backend calculation)
-const ACCRUAL_WINDOW_SECS_CONTRACT = 72 * 60 * 60; // 72 hours in seconds
-
-function calculateCollectableForBackend(
-  sbtInfoRaw: SbtInfoResultType, 
-  rankDataEntry: RankDataCacheEntry, 
-  currentTimestamp: number,
-  isActuallyDead: boolean // Pass the pre-calculated isActuallyDead
-): BigNumber { // Return ethers.BigNumber for consistency with other contract values initially
-  if (isActuallyDead) return ethers.BigNumber.from(0); // If already determined dead, nothing to collect
-
-  // Convert string values from cache/sbtInfoRaw to BigNumber/Number for calculation
-  const startTimestamp = sbtInfoRaw.startTimestamp.toNumber(); // Assuming BigNumber from ethers
-  const lastCollect = sbtInfoRaw.lastCollect.toNumber();
-  const collected = sbtInfoRaw.collected; // This is already ethers.BigNumber
-  const S_val = ethers.BigNumber.from(rankDataEntry.S); // S from cache is string
-  const T_val = parseInt(rankDataEntry.T, 10); // T from cache is string, parse to number
-
-  if (T_val === 0) { 
-      const remainingToCollect = S_val.sub(collected);
-      return remainingToCollect.gt(0) ? remainingToCollect : ethers.BigNumber.from(0);
-  }
-  
-  // Note: isActuallyDead check above should cover this, but keeping for robustness
-  const elapsedSinceStart = currentTimestamp - startTimestamp;
-  if (elapsedSinceStart >= T_val) {
-      return ethers.BigNumber.from(0);
-  }
-
-  const timeSinceLast = currentTimestamp - lastCollect;
-  const effectiveWindow = Math.min(timeSinceLast, ACCRUAL_WINDOW_SECS_CONTRACT);
-  if (effectiveWindow <= 0) return ethers.BigNumber.from(0);
-
-  // Perform calculations using ethers.BigNumber methods for precision
-  // potential = (S * effectiveWindow) / T
-  const potential = S_val.mul(effectiveWindow).div(T_val);
-  const remainingOverall = S_val.sub(collected);
-  
-  const toCollect = potential.gt(remainingOverall) ? remainingOverall : potential;
-  return toCollect.gt(0) ? toCollect : ethers.BigNumber.from(0);
-}
-
-// API: get leaderboard latest snapshot
+// API: get leaderboard latest snapshot - optimized version
 app.get('/leaderboard', async (req, res) => {
-  const snaps = await prisma.snapshot.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 100
-  });
-  res.json(snaps);
+  try {
+    const nowS = Math.floor(Date.now() / 1000);
+    
+    if (leaderboardCache && (nowS - leaderboardCacheTimestamp) < LEADERBOARD_CACHE_TTL) {
+      console.log('Serving leaderboard from cache using contract:', LILNAD_NFT_CONTRACT_ADDRESS);
+      // Apply pagination to cached data before sending
+      const page = parseInt(req.query.page as string || '1', 10);
+      const limit = parseInt(req.query.limit as string || '20', 10);
+      const skip = (page - 1) * limit;
+      
+      const fullLeaderboardEntries = leaderboardCache.allEntries; 
+      const paginatedEntries = fullLeaderboardEntries.slice(skip, skip + limit);
+      
+      return res.json({
+        totalEntries: fullLeaderboardEntries.length,
+        currentPage: page,
+        totalPages: Math.ceil(fullLeaderboardEntries.length / limit),
+        entries: paginatedEntries,
+        dataSource: 'cache',
+        cacheTimestamp: new Date(leaderboardCacheTimestamp * 1000).toISOString()
+      });
+    }
+    
+    console.log('Building new leaderboard data for contract:', LILNAD_NFT_CONTRACT_ADDRESS);
+    
+    if (!isRankDataCacheInitialized) {
+        console.warn('[API /leaderboard] RankData cache not initialized. Attempting to initialize now...');
+        if (!lilnadNftContract) {
+            return res.status(500).json({ error: 'NFT Contract not initialized on backend, cannot initialize cache.'})
+        }
+        await initializeRankDataCache(lilnadNftContract);
+        if (!isRankDataCacheInitialized) {
+            console.error('[API /leaderboard] Failed to initialize RankData cache. Leaderboard might be empty or inaccurate.');
+            // Allow to proceed but leaderboard might be empty if cache is crucial.
+        }
+    }
+
+    const allActiveNfts = await prisma.lilnadNft.findMany({
+      where: {
+        contractAddress: LILNAD_NFT_CONTRACT_ADDRESS.toLowerCase(),
+      },
+      select: {
+        ownerAddress: true,
+        rank: true,
+        mintTimestamp: true,
+        expirationTimestamp: true,
+      }
+    });
+
+    // New: fetch blacklisted addresses and filter them out
+    const blacklistedRows = await prisma.blacklistedAddress.findMany({ select: { address: true } });
+    const blacklistSet = new Set(blacklistedRows.map(b => b.address.toLowerCase()));
+    const activeNfts = allActiveNfts.filter(nft => !blacklistSet.has(nft.ownerAddress.toLowerCase()));
+
+    const userScores = new Map<string, { totalScore: number, nftCount: number, ranks: number[] }>();
+    const currentServerTimestampS = Math.floor(Date.now() / 1000);
+
+    for (const nft of activeNfts) {
+      // Pass only necessary data to calculateNftScore
+      const nftDataForScore: NftDbDataForScore = {
+          mintTimestamp: nft.mintTimestamp,
+          rank: nft.rank,
+          expirationTimestamp: nft.expirationTimestamp
+      };
+      const score = calculateNftScore(nftDataForScore, currentServerTimestampS, rankDataCache); // No await needed now
+      
+      const owner = nft.ownerAddress.toLowerCase();
+      if (userScores.has(owner)) {
+        const currentData = userScores.get(owner)!;
+        currentData.totalScore += score;
+        currentData.nftCount += 1;
+        currentData.ranks.push(nft.rank);
+      } else {
+        userScores.set(owner, { totalScore: score, nftCount: 1, ranks: [nft.rank] });
+      }
+    }
+
+    const leaderboardEntriesPreSort: any[] = [];
+    userScores.forEach((data, address) => {
+      leaderboardEntriesPreSort.push({
+        address: address,
+        collectedScore: data.totalScore,
+        nftCount: data.nftCount,
+        _ranksForPotentialScore: data.ranks 
+      });
+    });
+
+    leaderboardEntriesPreSort.sort((a, b) => b.collectedScore - a.collectedScore);
+    
+    const rankScoreEstimates: { [key: number]: number } = {
+        0: 3200, 1: 2400, 2: 1500, 3: 1200, 4: 900, 5: 800
+    };
+
+    const finalLeaderboardEntries = leaderboardEntriesPreSort.map((entry, index) => {
+        let totalPotentialScore = 0;
+        if (entry._ranksForPotentialScore) {
+            for (const rank of entry._ranksForPotentialScore) {
+                totalPotentialScore += rankScoreEstimates[rank] || 500;
+            }
+        }
+        return {
+            rank: index + 1,
+            address: entry.address,
+            nftCount: entry.nftCount,
+            collectedScore: Math.round(entry.collectedScore),
+            totalScore: totalPotentialScore,
+        };
+    });
+    
+    leaderboardCache = { allEntries: finalLeaderboardEntries };
+    leaderboardCacheTimestamp = nowS;
+    
+    const page = parseInt(req.query.page as string || '1', 10);
+    const limit = parseInt(req.query.limit as string || '20', 10);
+    const skip = (page - 1) * limit;
+    
+    const paginatedLeaderboard = finalLeaderboardEntries.slice(skip, skip + limit);
+    
+    const response = {
+      totalEntries: finalLeaderboardEntries.length,
+      currentPage: page,
+      totalPages: Math.ceil(finalLeaderboardEntries.length / limit),
+      entries: paginatedLeaderboard,
+      dataSource: 'live_calculation',
+      cacheTimestamp: new Date(leaderboardCacheTimestamp * 1000).toISOString()
+    };
+    
+    res.json(response);
+    
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard data' });
+  }
 });
 
-// API Endpoint to get NFTs by Owner (Enhanced)
+// API Endpoint to get NFTs by Owner (Enhanced for Passive Scoring)
 app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
   const { ownerAddress } = req.params;
   const page = parseInt(req.query.page as string, 10) || 1;
@@ -173,135 +351,62 @@ app.get('/api/nfts/owner/:ownerAddress', async (req, res) => {
 
   if (!lilnadNftContract) {
     console.warn('/api/nfts/owner/:ownerAddress called but lilnadNftContract is not initialized.');
-    return res.status(500).json({ error: 'NFT Contract not initialized on backend. Check server logs.' });
+    return res.status(500).json({ error: 'NFT Contract not initialized on backend.' });
   }
 
-  if (!isRankDataCacheInitialized) {
-    await initializeRankDataCache();
-    if (!isRankDataCacheInitialized) {
-        console.warn('RankData cache still not initialized after attempt for request.');
-    }
-  }
-
+  // Batch from DB with cached on-chain details
   try {
-    // Use the current contract address from config
-    const currentContractAddress = LILNAD_NFT_CONTRACT_ADDRESS;
-
-    const totalNfts = await prisma.lilnadNft.count({ 
-      where: { 
-        ownerAddress: ownerAddress,
-        contractAddress: currentContractAddress // Filter by current contract address
-      } 
+    const lowerOwnerAddress = ownerAddress.toLowerCase();
+    const contractAddressLower = LILNAD_NFT_CONTRACT_ADDRESS.toLowerCase();
+    // Count total items
+    const totalItems = await prisma.lilnadNft.count({
+      where: { ownerAddress: lowerOwnerAddress, contractAddress: contractAddressLower },
     });
-
-    if (totalNfts === 0) {
+    if (totalItems === 0) {
       return res.json({ data: [], currentPage: page, totalPages: 0, totalItems: 0 });
     }
-
-    const nftsFromDb = await prisma.lilnadNft.findMany({
-      where: { 
-        ownerAddress: ownerAddress,
-        contractAddress: currentContractAddress // Filter by current contract address
+    // Query page from DB
+    const dbNfts = await prisma.lilnadNft.findMany({
+      where: { ownerAddress: lowerOwnerAddress, contractAddress: contractAddressLower },
+      select: {
+        tokenId: true,
+        rank: true,
+        mintTimestamp: true,
+        expirationTimestamp: true,
+        scorePerSecond: true
       },
-      select: { tokenId: true, rank: true }, // Keep select minimal, other data comes from contract/cache
-      orderBy: [
-        { rank: 'asc' },      // Primary sort: Rank 0 (UR) comes first
-        { tokenId: 'asc' }   // Secondary sort: Lower token IDs first if ranks are same
-      ],
-      skip: skip,
+      orderBy: { tokenId: 'asc' },
+      skip,
       take: limit,
     });
-
-    if (nftsFromDb.length === 0 && page > 1) {
-        return res.json({ data: [], currentPage: page, totalPages: Math.ceil(totalNfts / limit), totalItems: totalNfts, message: "Page out of bounds" });
-    }
-    
-    const currentServerTimestamp = Math.floor(Date.now() / 1000);
-
-    const sbtInfoPromises = nftsFromDb.map(nftDb =>
-      lilnadNftContract!.sbtInfo(ethers.BigNumber.from(nftDb.tokenId))
-        .then((sbtInfoRaw: SbtInfoResultType) => ({ tokenId: nftDb.tokenId, sbtInfoRaw, error: null }))
-        .catch((err: Error) => ({ tokenId: nftDb.tokenId, sbtInfoRaw: null, error: err }))
-    );
-    const sbtInfoResults = await Promise.all(sbtInfoPromises);
-    const sbtInfoMap = new Map(sbtInfoResults.map(r => [r.tokenId, {raw: r.sbtInfoRaw, error: r.error}]));
-
-    const backendBaseUrl = process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 3001}`;
-    const enhancedNfts = [];
-
-    for (const nftDb of nftsFromDb) {
-      const sbtInfoFetchResult = sbtInfoMap.get(nftDb.tokenId);
-      const sbtInfoResultRaw = sbtInfoFetchResult?.raw;
-      const fetchError = sbtInfoFetchResult?.error;
-      
-      let sbtInfoDataForClient = null;
-      const cachedRankDataEntry = rankDataCache.get(nftDb.rank);
-      let rankDataForClient: RankDataCacheEntry | null = cachedRankDataEntry !== undefined ? cachedRankDataEntry : null;
-      
-      let calculatedDataForClient = {
-          isActuallyDead: true, 
-          collectableNow: "0",
-          totalAccrued: "0"
+    // Map to API shape with dynamic accumulated score (collectableNow)
+    const nowS = Math.floor(Date.now() / 1000);
+    const enhanced = dbNfts.map(nft => {
+      // Calculate current accumulated score based on mint, expiration, and rankDataCache
+      const nftForScore = {
+        mintTimestamp: nft.mintTimestamp,
+        rank: nft.rank,
+        expirationTimestamp: nft.expirationTimestamp,
       };
-      let errorFetchingOnChain = !!fetchError;
-      let specificErrorMessage = fetchError ? (fetchError.message || 'Error fetching sbtInfo') : undefined;
-
-      if (sbtInfoResultRaw) {
-        let isActuallyDeadCalc = sbtInfoResultRaw.isDead;
-        if (rankDataForClient && rankDataForClient.T && Number(rankDataForClient.T) > 0) {
-            const lifetime = Number(rankDataForClient.T);
-            const startTime = sbtInfoResultRaw.startTimestamp.toNumber();
-            if (currentServerTimestamp >= startTime + lifetime) {
-                isActuallyDeadCalc = true;
-            }
-        }
-        
-        let collectableNowBigNum = ethers.BigNumber.from(0);
-        if (rankDataForClient) { 
-            collectableNowBigNum = calculateCollectableForBackend(sbtInfoResultRaw, rankDataForClient, currentServerTimestamp, isActuallyDeadCalc);
-        }
-        
-        const totalAccruedBigNum = sbtInfoResultRaw.collected.add(collectableNowBigNum);
-
-        sbtInfoDataForClient = {
-            startTimestamp: sbtInfoResultRaw.startTimestamp.toString(),
-            lastCollect: sbtInfoResultRaw.lastCollect.toString(),
-            collected: sbtInfoResultRaw.collected.toString(),
-            isDead: sbtInfoResultRaw.isDead, 
-        };
-        calculatedDataForClient = {
-            isActuallyDead: isActuallyDeadCalc,
-            collectableNow: collectableNowBigNum.toString(),
-            totalAccrued: totalAccruedBigNum.toString()
-        };
-      } else if(fetchError && !rankDataForClient) { 
-        const fallbackRankData = rankDataCache.get(nftDb.rank);
-        rankDataForClient = fallbackRankData !== undefined ? fallbackRankData : null;
-      }
-
-      const constructedMetadataUri = `${backendBaseUrl}/api/metadata/lilnad/${nftDb.tokenId}`;
-      enhancedNfts.push({
-        tokenId: nftDb.tokenId,
-        rank: nftDb.rank,
-        metadataUri: constructedMetadataUri,
-        sbtInfo: sbtInfoDataForClient,
-        rankData: rankDataForClient,  
-        calculated: calculatedDataForClient,
-        errorFetchingOnChainData: errorFetchingOnChain,
-        errorMessage: specificErrorMessage,
-      });
-    }
-
-    res.json({
-      data: enhancedNfts,
-      currentPage: page,
-      totalPages: Math.ceil(totalNfts / limit),
-      totalItems: totalNfts,
+      const collectableNow = calculateNftScore(nftForScore, nowS, rankDataCache);
+      return {
+        tokenId: nft.tokenId,
+        rank: nft.rank,
+        startTimestamp: Math.floor(nft.mintTimestamp.getTime() / 1000).toString(),
+        expirationTimestamp: nft.expirationTimestamp
+          ? Math.floor(nft.expirationTimestamp.getTime() / 1000).toString()
+          : '0',
+        scorePerSecond: nft.scorePerSecond.toString(),
+        collectableNow: collectableNow.toString(),
+        isDead: nft.expirationTimestamp
+          ? nowS >= Math.floor(nft.expirationTimestamp.getTime() / 1000)
+          : false,
+      };
     });
-
+    return res.json({ data: enhanced, currentPage: page, totalPages: Math.ceil(totalItems / limit), totalItems });
   } catch (error: any) {
-    console.error(`Error in /api/nfts/owner/${ownerAddress} (page ${page}, limit ${limit}):`, error);
-    res.status(500).json({ error: 'Failed to fetch and enhance NFTs.', details: error.message });
+    console.error(`[API /api/nfts/owner] Error for owner ${ownerAddress}:`, error);
+    return res.status(500).json({ error: 'Failed to fetch NFTs and details.', details: error.message });
   }
 });
 
@@ -374,6 +479,48 @@ app.get('/api/metadata/lilnad/:tokenId', async (req, res) => {
   }
 });
 
+// New: Blacklist management endpoints
+app.post('/api/blacklist', adminAuth, async (req, res) => {
+  const { targetAddress } = req.body;  // เปลี่ยนจาก address เป็น targetAddress
+  if (!targetAddress || !/^0x[a-fA-F0-9]{40}$/.test(targetAddress)) {
+    return res.status(400).json({ error: 'Invalid target address format.' });
+  }
+  try {
+    const normalized = targetAddress.toLowerCase();
+    console.log('📝 Adding to blacklist:', normalized, 'by admin:', (req as any).adminAddress);
+    const blacklisted = await prisma.blacklistedAddress.create({ data: { address: normalized } });
+    return res.status(201).json(blacklisted);
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Address already blacklisted.' });
+    }
+    console.error('[API /api/blacklist] Error adding blacklist:', error);
+    return res.status(500).json({ error: 'Failed to add blacklist.' });
+  }
+});
+
+app.get('/api/blacklist', adminAuth, async (req, res) => {
+  try {
+    const list = await prisma.blacklistedAddress.findMany({ select: { address: true, createdAt: true } });
+    return res.json(list);
+  } catch (error) {
+    console.error('[API /api/blacklist] Error fetching blacklist:', error);
+    return res.status(500).json({ error: 'Failed to fetch blacklist.' });
+  }
+});
+
+app.delete('/api/blacklist/:address', adminAuth, async (req, res) => {
+  const { address } = req.params;
+  const normalized = address.toLowerCase();
+  try {
+    const removed = await prisma.blacklistedAddress.delete({ where: { address: normalized } });
+    return res.json(removed);
+  } catch (error) {
+    console.error(`[API /api/blacklist/${normalized}] Error removing blacklist:`, error);
+    return res.status(404).json({ error: 'Address not found in blacklist.' });
+  }
+});
+
 // Job: snapshot every 7 days
 const job = new cron.CronJob('0 0 */7 * *', async () => {
   console.log('Running weekly snapshot job...');
@@ -392,15 +539,18 @@ const job = new cron.CronJob('0 0 */7 * *', async () => {
 });
 // job.start(); // Keep disabled until snapshot logic is updated
 
+// Add a simple health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    contractAddress: LILNAD_NFT_CONTRACT_ADDRESS
+  });
+});
+
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Backend listening on ${port}`);
-  // Start the Indexer after server starts
-  if (process.env.RUN_INDEXER === 'true') {
-    console.log("Attempting to start indexer as RUN_INDEXER is 'true'");
-    startIndexer();
-  } else {
-    console.log("Indexer is disabled.");
-    console.log(`Reason: RUN_INDEXER value is '${process.env.RUN_INDEXER}' (expected 'true')`);
-  }
+  console.log("Starting indexer (no RUN_INDEXER guard)");
+  startIndexer(lilnadNftContract);
 }); 

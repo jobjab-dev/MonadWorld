@@ -16,41 +16,72 @@ interface NftApiResponse {
 function MintModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter();
   
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
+  
+  const handleClose = () => {
+    document.body.style.overflow = 'auto';
+    onClose();
+  };
+  
   if (!isOpen) return null;
   
   const handleMintClick = () => {
+    document.body.style.overflow = 'auto';
     router.push('/mint');
   };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black bg-opacity-70" onClick={onClose}></div>
-      <div className="relative bg-pixel-purple-dark border-4 border-pixel-purple-medium rounded-pixel-md p-6 w-full max-w-lg z-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-pixel text-pixel-accent">Mint Your Lilnad NFT</h2>
-          <button onClick={onClose} className="text-white text-2xl hover:text-pixel-accent">&times;</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn" onClick={handleClose}>
+      <div className="relative z-10 w-[480px] bg-pixel-purple-dark border-4 border-pixel-purple-medium rounded-none p-5 overflow-hidden shadow-xl animate-scaleIn mx-auto my-0" onClick={e => e.stopPropagation()}>
+        {/* Pixel dots in corners */}
+        <div className="absolute top-2 left-2 w-3 h-3 bg-pixel-accent"></div>
+        <div className="absolute top-2 right-2 w-3 h-3 bg-pixel-accent"></div>
+        <div className="absolute bottom-2 left-2 w-3 h-3 bg-pixel-accent"></div>
+        <div className="absolute bottom-2 right-2 w-3 h-3 bg-pixel-accent"></div>
+        
+        {/* Modal Header */}
+        <div className="flex justify-center items-center mb-4">
+          <h2 className="text-2xl font-press-start text-pixel-accent text-center">
+            Mint Your Lilnad NFT
+          </h2>
         </div>
         
+        {/* Divider */}
+        <div className="border-b-2 border-pixel-purple-medium mb-4 w-1/2 mx-auto"></div>
+        
         <div className="mb-6">
-          <p className="text-pixel-text mb-4">Mint your first Lilnad NFT to join the MonadWorld!</p>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-pixel-purple-medium p-3 rounded-pixel-sm text-center">
+          <p className="text-pixel-text mb-3 text-center">Mint your first Lilnad NFT to join the MonadWorld!</p>
+          <div className="grid grid-cols-2 gap-0 mb-3">
+            <div className="bg-pixel-purple-medium p-2 text-center">
               <p className="text-pixel-text font-bold">SBT Collection</p>
-              <p className="text-sm text-pixel-text opacity-80">Earn Score Over Time</p>
+              <p className="text-sm text-pixel-text opacity-80">Earn Points Over Time</p>
             </div>
-            <div className="bg-pixel-purple-medium p-3 rounded-pixel-sm text-center">
+            <div className="bg-pixel-purple-medium p-2 text-center">
               <p className="text-pixel-text font-bold">Rarity System</p>
               <p className="text-sm text-pixel-text opacity-80">6 Rarity Levels</p>
             </div>
           </div>
         </div>
         
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={handleClose}
+            className="px-6 py-2 bg-gray-600 text-white text-lg font-vt323 font-bold rounded-none hover:bg-gray-700 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-gray-800"
+          >
+            CLOSE
+          </button>
           <button 
             onClick={handleMintClick}
-            className="px-8 py-3 bg-pixel-accent text-black text-2xl font-pixel font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
+            className="px-6 py-2 bg-pixel-accent text-black text-lg font-vt323 font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
           >
-            GO TO MINT PAGE <span className="ml-3 inline-block">→</span>
+            MINT NOW <span className="ml-2 inline-block">→</span>
           </button>
         </div>
       </div>
@@ -129,7 +160,7 @@ function PixelCharacter({ characterType, mapWidth, mapHeight }: { characterType:
           frame: (prevPos.frame + (isMoving ? 1 : 0)) % 4  // 4-frame animation cycle
         };
       });
-    }, 400); // Movement update interval
+    }, 200); // Movement update interval - เร็วขึ้น
     return () => clearInterval(moveInterval);
   }, [mapWidth, mapHeight, character.speed, charSizeW, charSizeH]);
 
@@ -146,20 +177,95 @@ function PixelCharacter({ characterType, mapWidth, mapHeight }: { characterType:
 
   return (
     <div 
-      className={`${character.size} ${character.color} rounded-pixel-sm absolute shadow-md transition-all duration-300 overflow-hidden border-2 border-t-purple-300 border-l-purple-300 border-r-purple-800 border-b-purple-800 flex items-center justify-center`}
+      className={`absolute shadow-md transition-all duration-300 overflow-hidden border-2 border-t-purple-300 border-l-purple-300 border-r-purple-800 border-b-purple-800 flex items-center justify-center ${character.color} rounded-pixel-sm`}
       style={{ 
         left: `${position.left}px`, 
-        top: `${position.top}px`
+        top: `${position.top}px`,
+        width: `${charSizeW}px`,
+        height: `${charSizeH}px`,
       }}
     >
       <div 
-        className="text-lg md:text-2xl" 
+        className="text-2xl md:text-3xl" 
         style={getSpriteStyles()}
       >
         {character.icon}
       </div>
       {/* Shadow beneath character */}
       <div className="absolute bottom-0 w-4/5 h-1 bg-black rounded-full opacity-30"></div>
+    </div>
+  );
+}
+
+// เพิ่ม Pixel Item component
+function PixelItem({ itemType, mapWidth, mapHeight }: { itemType: number, mapWidth: number, mapHeight: number }) {
+  const items = [
+    { icon: '💎', color: 'text-blue-400', size: 'text-lg', glow: 'blue' },
+    { icon: '⭐', color: 'text-yellow-400', size: 'text-xl', glow: 'yellow' },
+    { icon: '🍄', color: 'text-red-400', size: 'text-lg', glow: 'red' },
+    { icon: '🔮', color: 'text-purple-400', size: 'text-lg', glow: 'purple' }
+  ];
+
+  const item = items[itemType % items.length];
+  
+  const [position] = useState({
+    left: Math.random() * (mapWidth - 30),
+    top: Math.random() * (mapHeight - 30)
+  });
+
+  const [hovering, setHovering] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHovering(prev => !prev);
+    }, 1000 + Math.random() * 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div 
+      className={`absolute ${item.size} ${item.color}`}
+      style={{ 
+        left: `${position.left}px`, 
+        top: `${position.top}px`,
+        filter: `drop-shadow(0 0 3px ${item.glow})`,
+        transform: `translateY(${hovering ? -3 : 0}px)`,
+        transition: 'transform 1s ease-in-out'
+      }}
+    >
+      {item.icon}
+    </div>
+  );
+}
+
+// เพิ่ม Mini Map component
+function MiniMap() {
+  return (
+    <div className="absolute top-2 right-2 w-20 h-20 bg-black bg-opacity-40 border border-pixel-purple-medium rounded-sm overflow-hidden p-1">
+      <div className="w-full h-full relative">
+        {/* Map dots */}
+        <div className="absolute w-2 h-2 bg-pixel-accent rounded-full" style={{ top: '30%', left: '20%' }}></div>
+        <div className="absolute w-1 h-1 bg-pixel-accent rounded-full" style={{ top: '50%', left: '40%' }}></div>
+        <div className="absolute w-1 h-1 bg-pixel-accent rounded-full" style={{ top: '70%', left: '60%' }}></div>
+        <div className="absolute w-2 h-2 bg-purple-400 rounded-full" style={{ top: '40%', left: '80%' }}></div>
+        
+        {/* Player position */}
+        <div className="absolute w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ top: '50%', left: '50%' }}></div>
+      </div>
+    </div>
+  );
+}
+
+// เพิ่ม Game Menu component
+function GameMenu() {
+  return (
+    <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 border border-pixel-purple-medium rounded-sm p-1 text-xs text-pixel-accent font-vt323">
+      <div className="flex space-x-2">
+        <span className="px-1 border border-pixel-purple-medium hover:bg-pixel-purple-medium cursor-pointer">MENU</span>
+        <span className="px-1 border border-pixel-purple-medium hover:bg-pixel-purple-medium cursor-pointer">INV</span>
+        <span className="px-1 border border-pixel-purple-medium hover:bg-pixel-purple-medium cursor-pointer">MAP</span>
+      </div>
     </div>
   );
 }
@@ -172,35 +278,62 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [showMintModal, setShowMintModal] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
+  const previewImages = ['1.png','2.png','3.png','4.png','5.png'];
+  const [currentPreview, setCurrentPreview] = useState(0);
+  const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
+  const [showFeatureModal, setShowFeatureModal] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
+  const prevPreview = () => setCurrentPreview((prev) => (prev + previewImages.length - 1) % previewImages.length);
+  const nextPreview = () => setCurrentPreview((prev) => (prev + 1) % previewImages.length);
   const router = useRouter();
-
-  const mapRef = useCallback((node: HTMLDivElement | null) => {
-    if (node !== null) {
-      setMapDimensions({ width: node.offsetWidth, height: node.offsetHeight });
-    }
-  }, []);
   
-  const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
-
-  // ข้อมูลคุณสมบัติของ NFT แบบตัวอย่าง
+  // ข้อมูลคุณสมบัติของ NFT แบบตัวอย่าง - ทำให้กระชับขึ้น
   const features = [
     {
-      title: "Score Accrual",
-      description: "Your Lilnad NFT continuously accrues score over time that you can collect and compete for rewards."
+      title: "POINT\nACCRUAL",
+      description: "Earn point over time and compete for rewards in the MonadWorld ecosystem.",
+      details: "Your Lilnad NFTs automatically accrue points over time based on their rarity and age. The higher the rarity, the faster points accumulate. These points determine your rank on the leaderboard and your eligibility for seasonal rewards."
     },
     {
-      title: "Rarity System",
-      description: "Discover NFTs with different rarity levels: Common, Uncommon, Rare, Super Rare, Super Super Rare, and Ultra Rare."
+      title: "RARITY\nSYSTEM",
+      description: "6 rarity levels from Common to Ultra Rare, each with unique properties.",
+      details: "Our rarity system includes Common (C), Uncommon (UC), Rare (R), Super Rare (SR), Super Super Rare (SSR), and Ultra Rare (UR). Higher rarity NFTs have better visual features, faster point accrual rates, and special access to exclusive events and rewards."
     },
     {
-      title: "Interactive World",
-      description: "Explore the MonadWorld with your Lilnad NFTs and interact with other collectors in the ecosystem."
+      title: "INTERACTIVE\nWORLD",
+      description: "Join other collectors in an interactive pixel world built on Monad.",
+      details: "Coming soon - The MonadWorld metaverse will allow you to interact with other NFT owners, participate in community events, mini-games, and unlock special rewards through exploration."
     },
     {
-      title: "Ecosystem Rewards",
-      description: "Earn rewards and exclusive benefits in the MonadWorld ecosystem based on your NFT collection and score."
+      title: "ECOSYSTEM\nREWARDS",
+      description: "Get exclusive benefits based on your point.",
+      details: "The main reward is $LOVE tokens distributed at the end of each season. The more points you accumulate, the higher chance you'll have to win bigger rewards. Those with outstanding collection, accumulation, and participation will receive special unexpected surprises."
     }
   ];
+  
+  // คำอธิบายฟีเจอร์แบบสั้น
+  const shortDescriptions = [
+    "Earn point over time and compete for rewards in the MonadWorld ecosystem.",
+    "6 rarity levels from Common to Ultra Rare, each with unique properties.",
+    "Join other collectors in an interactive pixel world built on Monad.",
+    "Get exclusive benefits based on your NFT collection and point."
+  ];
+
+  // Toggle feature expansion
+  const toggleFeatureDetails = (index: number) => {
+    if (index === 2) return; // ไม่ให้คลิกได้สำหรับ INTERACTIVE WORLD
+    setSelectedFeature(index);
+    setShowFeatureModal(true);
+    // ควบคุม scroll ของ body
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // ฟังก์ชันปิด modal
+  const closeFeatureModal = () => {
+    setShowFeatureModal(false);
+    // คืนค่า scroll ของ body
+    document.body.style.overflow = 'auto';
+  };
 
   // Feature rotation
   useEffect(() => {
@@ -248,119 +381,96 @@ export default function HomePage() {
   };
 
   if (!isMounted) {
-    return <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] font-pixel text-pixel-purple-light"><p>Initializing MonadWorld...</p></div>;
+    return <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] font-vt323 text-pixel-purple-light text-2xl"><p>⏳ Initializing MonadWorld...</p></div>;
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-5rem)] font-pixel relative overflow-hidden">
+    <div className="flex flex-col min-h-[calc(100vh-5rem)] relative overflow-hidden">
       {/* Hero Section */}
-      <div className="bg-pixel-purple-dark py-16 border-b-4 border-pixel-purple-medium">
-        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-8">
-          <div className="w-full text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-pixel-accent mb-4">Welcome to MonadWorld</h1>
-            <p className="text-xl text-pixel-text mb-6">Collect, earn, and compete with Lilnad NFTs on the Monad blockchain!</p>
+      <div className="bg-pixel-purple-dark py-12 border-b border-white" style={{ paddingBottom: '10px' }}>
+        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-16">
+          <div className="w-full text-center mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-pixel-accent mb-3 font-press-start text-shadow-pixel">WELCOME TO MONADWORLD</h1>
           </div>
           
-          {/* Square Game Preview Box */}
-          <div className="w-full mb-8">
-            <div className="text-center mb-1">
-              <span className="text-sm font-pixel text-pixel-accent bg-pixel-purple-dark px-3 py-0.5 border border-pixel-purple-medium inline-block shadow-[1px_1px_0_#000]" style={{ textShadow: '0 0 5px rgba(240,230,140,0.6)' }}>
-                GAME PREVIEW
-              </span>
-            </div>
-            <div className="relative w-[560px] h-[560px] mx-auto">
-              {/* Game screen container */}
-              <div 
-                className="absolute inset-0 bg-pixel-purple-dark border-2 border-pixel-purple-medium rounded overflow-hidden shadow-[0_0_8px_rgba(138,43,226,0.5)]"
-                style={{
-                  boxShadow: '0 0 8px rgba(138,43,226,0.4), inset 0 0 4px rgba(138,43,226,0.4)',
-                  backgroundImage: 'radial-gradient(circle at center, rgba(138,43,226,0.1) 0%, rgba(40,20,60,0.5) 100%)'
-                }}
-              >
-                {/* Pixel grid background */}
-                <div 
-                  className="absolute inset-0" 
-                  style={{
-                    backgroundImage: 'linear-gradient(rgba(138,43,226,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(138,43,226,0.2) 1px, transparent 1px)',
-                    backgroundSize: '24px 24px',
-                    backgroundPosition: '-0.5px -0.5px'
-                  }}
-                ></div>
-                
-                {/* Scan lines effect */}
-                <div 
-                  className="absolute inset-0 pointer-events-none opacity-40" 
-                  style={{
-                    backgroundImage: 'linear-gradient(transparent 0px, rgba(0,0,0,0.05) 1px)',
-                    backgroundSize: '2px 2px'
-                  }}
-                ></div>
+          {/* Game Preview Slider */}
+          <div className="w-full flex items-center justify-center mb-8" style={{ paddingBottom: '10px' }}>
+            <button 
+              onClick={prevPreview} 
+              className="text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 mr-4 focus:outline-none z-10"
+              aria-label="Previous preview"
+            >
+              ‹
+            </button>
+            
+            <div className="relative w-[520px] md:w-[520px] h-[520px] md:h-[520px]">
+              {/* Pixel art frame - Black outer border */}
+              <div className="absolute inset-0 border-4 border-black z-5"></div>
               
-                {/* Game characters */}
-                <div ref={mapRef} className="absolute inset-0">
-                  {mapDimensions.width > 0 && (
-                    <>
-                      {/* Animated pixel characters */}
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <PixelCharacter
-                          key={i}
-                          characterType={i % 4}
-                          mapWidth={mapDimensions.width}
-                          mapHeight={mapDimensions.height}
-                        />
-                      ))}
-                      
-                      {/* Floating particles */}
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div
-                          key={`particle-${i}`}
-                          className={`absolute w-1 h-1 ${i % 2 === 0 ? 'bg-pixel-accent' : 'bg-purple-300'} rounded-full`}
-                          style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            opacity: 0.6 + Math.random() * 0.4,
-                            animation: `float ${2 + Math.random() * 3}s ease-in-out infinite alternate`,
-                            animationDelay: `${Math.random() * 2}s`,
-                            boxShadow: '0 0 3px currentColor'
-                          }}
-                        ></div>
-                      ))}
-                    </>
-                  )}
-                </div>
-                
-                {/* Game UI Elements */}
-                <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 px-1 py-0.5 rounded">
-                  <span className="text-pixel-accent text-xs font-pixel">
-                    MONADWORLD
-                  </span>
-                </div>
+              {/* Black corner blocks */}
+              <div className="absolute top-0 left-0 w-3 h-3 bg-black z-10"></div>
+              <div className="absolute top-0 right-0 w-3 h-3 bg-black z-10"></div>
+              <div className="absolute bottom-0 left-0 w-3 h-3 bg-black z-10"></div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-black z-10"></div>
+              
+              {/* White pixels at inner corners with pulse animation */}
+              <div className="absolute top-3 left-3 w-2 h-2 bg-white z-15 animate-pulse-slow"></div>
+              <div className="absolute top-3 right-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute bottom-3 left-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute bottom-3 right-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+              
+              {/* Image container with proper spacing */}
+              <div className="absolute top-5 left-5 right-5 bottom-5 bg-black overflow-hidden z-1">
+                <img 
+                  src={`/NEW LILNAD MINTED/${previewImages[currentPreview]}`}
+                  alt={`Game preview ${currentPreview + 1}`}
+                  className="w-full h-full object-cover block transition-opacity duration-300 ease-in-out"
+                  key={currentPreview}
+                />
               </div>
-              
-              {/* Decorative corners */}
-              <div className="absolute top-0 left-0 w-2 h-2 bg-white opacity-70"></div>
-              <div className="absolute top-0 right-0 w-2 h-2 bg-white opacity-70"></div>
-              <div className="absolute bottom-0 left-0 w-2 h-2 bg-white opacity-70"></div>
-              <div className="absolute bottom-0 right-0 w-2 h-2 bg-white opacity-70"></div>
             </div>
+            
+            <button 
+              onClick={nextPreview} 
+              className="text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 ml-4 focus:outline-none z-10"
+              aria-label="Next preview"
+            >
+              ›
+            </button>
           </div>
           
-          {/* Buttons */}
-          <div className="flex gap-4 flex-wrap justify-center">
+          {/* Slide indicator dots */}
+          <div className="flex justify-center space-x-2 mb-20">
+            {previewImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPreview(index)}
+                className={`w-3 h-3 rounded-full focus:outline-none transition-colors duration-200 ${
+                  currentPreview === index 
+                    ? 'bg-pixel-accent' 
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-5 flex-wrap justify-center mt-20" style={{ marginTop: '15px' }}>
             <button 
               onClick={() => setShowMintModal(true)}
-              className="px-8 py-3 bg-pixel-accent text-black text-2xl font-pixel font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
+              className="px-5 py-3 bg-pixel-accent text-black text-lg font-press-start font-bold rounded-none hover:bg-yellow-400 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-amber-700"
             >
-              MINT YOUR FIRST NFT <span className="ml-3 inline-block">→</span>
+              MINT YOUR FIRST NFT <span className="ml-2 inline-block">→</span>
             </button>
             
             {isConnected && nftCount > 0 && (
               <button 
                 onClick={handleViewCollection}
-                className="px-8 py-3 bg-pixel-purple-medium text-pixel-accent text-2xl font-pixel font-bold rounded-none hover:bg-purple-700 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-purple-900"
+                className="px-5 py-3 bg-pixel-purple-medium text-pixel-accent text-lg font-vt323 font-bold rounded-none hover:bg-purple-700 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-purple-900"
               >
                 VIEW YOUR COLLECTION
-                <span className="ml-3 inline-block">→</span>
+                <span className="ml-2 inline-block">→</span>
               </button>
             )}
           </div>
@@ -368,78 +478,108 @@ export default function HomePage() {
       </div>
       
       {/* Features Section */}
-      <div className="py-16 bg-pixel-bg">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-pixel-accent mb-12">Lilnad NFT Features</h2>
+      <div className="page-features-section py-12 bg-pixel-purple-dark border-t-4 border-b-4 border-pixel-purple-medium">
+        <div className="container mx-auto px-4"style={{ marginTop: '10px' }}>
+          <div className="text-center mb-10">
+            <h2 className="inline-block px-6 py-2 text-2xl md:text-3xl font-press-start text-white">
+              LILNAD NFT FEATURES
+            </h2>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={index}
-                className={`p-6 border-4 rounded-pixel-md shadow-pixel transition-all duration-300 ${
-                  index === activeFeature 
-                    ? 'border-pixel-accent bg-pixel-purple-dark scale-105' 
-                    : 'border-pixel-purple-medium bg-pixel-purple-dark/60'
-                }`}
+                className="relative overflow-hidden flex flex-col w-full mx-auto"
+                style={{ minHeight: "300px", marginBottom: "15px" }}
               >
-                <h3 className="text-xl font-bold text-pixel-accent mb-3">{feature.title}</h3>
-                <p className="text-pixel-text">{feature.description}</p>
+                {/* Pixel dot in top-left corner - Adjusted for border */}
+                <div className="absolute top-[4px] left-[4px] w-2 h-2 bg-white z-10"></div>
+                {/* Pixel dot in top-right corner - Adjusted for border */}
+                <div className="absolute top-[4px] right-[4px] w-2 h-2 bg-white z-10"></div>
+                
+                {/* Header - Purple background with yellow text */}
+                <div className="bg-pixel-purple-medium py-5 px-3 flex justify-center items-center border-b-2 border-black">
+                  <h3 className="text-center text-2xl md:text-2xl lg:text-3xl font-press-start text-pixel-accent whitespace-pre-line leading-tight">
+                    {feature.title}
+                  </h3>
+                </div>
+                
+                {/* Content - Black background with centered text */}
+                <div className="bg-black p-6 flex-grow flex flex-col justify-between items-center text-center">
+                  <div className="w-full flex-grow flex items-center justify-center">
+                    <p className="text-pixel-accent font-vt323 text-xl md:text-2xl lg:text-3xl leading-relaxed text-center px-3 md:px-6">
+                      {feature.description}
+                    </p>
+                  </div>
+                  
+                  {/* Learn More button */}
+                  <div className="mt-4 w-full">
+                    <button 
+                      onClick={() => toggleFeatureDetails(index)} 
+                      className={`w-full font-pixel text-base md:text-lg py-2 text-center shadow-pixel border-b-4 border-r-4 border-black transition-colors duration-150 ${
+                        index === 2 
+                          ? "bg-purple-400 text-white hover:bg-purple-500 soon-button" 
+                          : "bg-pixel-accent text-black hover:bg-yellow-400"
+                      }`}
+                    >
+                      {index === 2 ? "SOON!" : "LEARN MORE →"}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Pixel dot in bottom-right corner - Adjusted for border */}
+                <div className="absolute bottom-[4px] right-[4px] w-2 h-2 bg-white z-10"></div>
+                {/* Pixel dot in bottom-left corner - Adjusted for border */}
+                <div className="absolute bottom-[4px] left-[4px] w-2 h-2 bg-white z-10"></div>
               </div>
             ))}
           </div>
         </div>
       </div>
       
-      {/* World Preview Section - Updated */}
-      <div className="py-16 bg-pixel-purple-dark border-t-4 border-pixel-purple-medium">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-pixel-accent mb-6">EXPLORE MONADWORLD</h2>
-          <p className="text-center text-pixel-text mb-8 max-w-2xl mx-auto">Join a vibrant community of collectors and explorers in the Monad ecosystem.</p>
-          
-          {/* Enter World Button */}
-          <div className="flex justify-center">
-            {isConnected && nftCount > 0 ? (
-              <button 
-                onClick={handleEnterWorld}
-                className="px-10 py-4 bg-pixel-accent text-black text-2xl font-pixel font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
-              >
-                ENTER WORLD <span className="ml-3 inline-block">→</span>
-              </button>
-            ) : isConnected && nftCount === 0 ? (
-              <button 
-                onClick={() => setShowMintModal(true)}
-                className="px-10 py-4 bg-pixel-accent text-black text-2xl font-pixel font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
-              >
-                MINT TO ENTER WORLD <span className="ml-3 inline-block">→</span>
-              </button>
-            ) : (
-              <button 
-                className="relative inline-flex items-center justify-between px-10 py-4 bg-gray-700 text-gray-400 text-xl font-bold rounded-pixel-sm border-4 border-t-gray-600 border-l-gray-600 border-r-gray-800 border-b-gray-800 shadow-[4px_4px_0_#000] cursor-not-allowed opacity-80"
-              >
-                CONNECT WALLET TO ENTER <span className="ml-3 inline-block">→</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Call to Action */}
-      <div className="py-12 bg-pixel-bg">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-pixel-accent mb-6">READY TO JOIN MONADWORLD?</h2>
-          <p className="text-pixel-text mb-8 max-w-2xl mx-auto">Mint your first Lilnad NFT and start your journey in the Monad ecosystem today!</p>
-          
-          <button 
-            onClick={() => setShowMintModal(true)}
-            className="px-10 py-4 bg-pixel-accent text-black text-2xl font-pixel font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
-          >
-            MINT NOW <span className="ml-3 inline-block">→</span>
-          </button>
-        </div>
-      </div>
-      
       {/* Mint Modal */}
       <MintModal isOpen={showMintModal} onClose={() => setShowMintModal(false)} />
+      
+      {/* Feature Details Modal */}
+      {showFeatureModal && selectedFeature !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto animate-fadeIn" onClick={closeFeatureModal}>
+          <div className="relative z-10 w-[480px] bg-pixel-purple-dark border-4 border-pixel-purple-medium rounded-none p-6 overflow-hidden shadow-xl animate-scaleIn mx-auto my-0" onClick={e => e.stopPropagation()}>
+            {/* Pixel dots in corners */}
+            <div className="absolute top-2 left-2 w-3 h-3 bg-pixel-accent"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 bg-pixel-accent"></div>
+            <div className="absolute bottom-2 left-2 w-3 h-3 bg-pixel-accent"></div>
+            <div className="absolute bottom-2 right-2 w-3 h-3 bg-pixel-accent"></div>
+            
+            {/* Modal Header */}
+            <div className="flex justify-center items-center mb-6">
+              <h2 className="text-2xl font-press-start text-pixel-accent whitespace-pre-line leading-tight text-center">
+                {features[selectedFeature].title}
+              </h2>
+            </div>
+            
+            {/* Divider */}
+            <div className="border-b-2 border-pixel-purple-medium mb-6 w-1/2 mx-auto"></div>
+            
+            {/* Modal Content */}
+            <div className="mb-6 px-2">
+              <p className="text-white font-vt323 text-xl leading-relaxed">
+                {features[selectedFeature].details}
+              </p>
+            </div>
+            
+            {/* Button Section */}
+            <div className="pt-6 flex justify-center">
+              <button
+                onClick={closeFeatureModal}
+                className="px-8 py-3 bg-pixel-accent text-black font-vt323 text-lg font-bold rounded-none hover:bg-yellow-400 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
+              >
+                CLOSE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Animation Styles - Updated to include new effects */}
       <style jsx global>{`
@@ -458,12 +598,23 @@ export default function HomePage() {
           }
         }
         
-        @keyframes bounce {
+        @keyframes fadeIn {
           from {
-            transform: translateY(-50%) translateX(0);
+            opacity: 0;
           }
           to {
-            transform: translateY(-30%) translateX(5px);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
           }
         }
         
@@ -509,6 +660,68 @@ export default function HomePage() {
           }
           99% {
             opacity: 0.4;
+          }
+        }
+        
+        @keyframes featureGlow {
+          0%, 100% {
+            box-shadow: 0 4px 0 #000;
+          }
+          50% {
+            box-shadow: 0 4px 0 #000, 0 0 8px 2px rgba(138, 43, 226, 0.4);
+          }
+        }
+        
+        @keyframes pixelWalk {
+          0% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% {
+            opacity: 0.4;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.05);
+          }
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        @keyframes flashing {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        .soon-button {
+          animation: flashing 1.5s ease-in-out infinite;
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        
+        .animate-scaleIn {
+          animation: scaleIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes bounce {
+          from {
+            transform: translateY(-50%) translateX(0);
+          }
+          to {
+            transform: translateY(-30%) translateX(5px);
           }
         }
       `}</style>

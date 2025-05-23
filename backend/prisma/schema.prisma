@@ -13,6 +13,7 @@ model User {
   tokens    Token[]
   rewards   Reward[]
   createdAt DateTime  @default(now())
+  lilnads   LilnadNft[] @relation("UserNfts")
 }
 
 model Token {
@@ -45,15 +46,26 @@ model Reward {
 }
 
 model LilnadNft {
-  id              String    @id @default(cuid())
-  tokenId         String    // Token ID from contract
-  ownerAddress    String
-  contractAddress String    // Required: Will store the current contract address
-  rank            Int
-  mintTimestamp   DateTime  // This should be set by the indexer
-  metadataUri     String?
+  id                   String    @id @default(cuid())
+  tokenId              String
+  ownerAddress         String    // Stored in lowercase
+  owner                User?     @relation("UserNfts", fields: [ownerAddress], references: [address])
+  contractAddress      String    // Stored in lowercase
+  rank                 Int
+  mintTimestamp        DateTime  // Start time of the NFT's lifecycle / score generation
+  expirationTimestamp  DateTime? // Calculated time when the NFT becomes "dead"
+  scorePerSecond       Float     @default(0) // Points per second from rankData cache
+  metadataUri          String?   // Stored from RevealAndMint event
+  lastCollectedScore   Float     @default(0) // Score accumulated for leaderboard
+  lastCollectedTimestamp DateTime? // Timestamp when the score was last collected
 
   @@map("lilnad_nfts")
   @@index([ownerAddress])
   @@unique([contractAddress, tokenId])
+}
+
+model BlacklistedAddress {
+  id        Int      @id @default(autoincrement())
+  address   String   @unique
+  createdAt DateTime @default(now())
 } 
