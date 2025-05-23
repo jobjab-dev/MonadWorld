@@ -100,7 +100,7 @@ export default function Footer() {
                   
                   {/* Discord */}
                   <Link
-                    href="https://discord.gg/monadworld"
+                    href="https://discord.gg/FSbhCEEJt6"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="social-icon-link mx-5"
