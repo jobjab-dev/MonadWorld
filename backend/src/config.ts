@@ -1,6 +1,6 @@
 import { defineChain, Abi } from 'viem'
-// Revert back to require for JSON import as 'with' is problematic with current TS/module setup
-const LilnadNFTJson = require('../../artifacts/contracts/LilnadNFT.sol/LilnadNFT.json');
+// Load ABI from backend/abi directory instead of artifacts (which is gitignored)
+const LilnadNFTJson = require('../abi/LilnadNFT.json');
 
 // 1. Define Chain
 export const monadTestnetChain = defineChain({
