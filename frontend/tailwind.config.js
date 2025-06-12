@@ -27,6 +27,8 @@ module.exports = {
         // 'sans': ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans], // Example of overriding default sans
         // 'mono': ['var(--font-geist-mono)', ...defaultTheme.fontFamily.mono],   // Example of overriding default mono
         'pixel': ['var(--font-pixelify-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'], // Apply Pixelify Sans via this utility
+        'vt323': ['var(--font-vt323)', 'monospace'],
+        'press-start': ['var(--font-press-start-2p)', 'monospace'],
       },
       // You can extend other theme properties like boxShadow, borderRadius for pixel style
       borderRadius: {
@@ -36,7 +38,16 @@ module.exports = {
       },
       boxShadow: {
         'pixel': '4px 4px 0px #000', // Example: simple pixel shadow
+        'pixel-sm': '2px 2px 0px #000',
+        'pixel-md': '4px 4px 0px #000',
         'pixel-lg': '6px 6px 0px #000',
+        'pixel-xl': '8px 8px 0px #000',
+        'pixel-2xl': '12px 12px 0px #000',
+      },
+      textShadow: {
+        'pixel': '2px 2px 0px #000',
+        'pixel-sm': '1px 1px 0px #000',
+        'pixel-lg': '3px 3px 0px #000',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -44,6 +55,9 @@ module.exports = {
         'twinkle': 'twinkle 4s ease infinite',
         'fadeIn': 'fadeIn 0.3s ease-in-out',
         'scaleIn': 'scaleIn 0.3s ease-out',
+        'pixel-glow': 'pixel-glow 2s ease-in-out infinite',
+        'pixel-bounce': 'pixel-bounce 2s ease-in-out infinite',
+        'pixel-fade-in': 'pixel-fade-in 0.3s ease-out',
       },
       keyframes: {
         pulse: {
@@ -65,6 +79,40 @@ module.exports = {
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'pixel-glow': {
+          '0%, 100%': { 
+            boxShadow: '0 0 5px rgba(138, 43, 226, 0.5)',
+            transform: 'scale(1)'
+          },
+          '50%': { 
+            boxShadow: '0 0 20px rgba(138, 43, 226, 0.8)',
+            transform: 'scale(1.02)'
+          },
+        },
+        'pixel-bounce': {
+          '0%, 20%, 53%, 80%, 100%': { 
+            transform: 'translateY(0px)' 
+          },
+          '40%, 43%': { 
+            transform: 'translateY(-15px)' 
+          },
+          '70%': { 
+            transform: 'translateY(-5px)' 
+          },
+          '90%': { 
+            transform: 'translateY(-2px)' 
+          },
+        },
+        'pixel-fade-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.8)'
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1)'
+          },
         },
       },
     },
