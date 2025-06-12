@@ -38,48 +38,48 @@ function MintModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn" onClick={handleClose}>
-      <div className="relative z-10 w-[480px] bg-pixel-purple-dark border-4 border-pixel-purple-medium rounded-none p-5 overflow-hidden shadow-xl animate-scaleIn mx-auto my-0" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn p-4" onClick={handleClose}>
+      <div className="relative z-10 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl bg-pixel-purple-dark border-4 border-pixel-purple-medium rounded-none p-4 sm:p-5 md:p-6 overflow-hidden shadow-xl animate-scaleIn mx-auto my-0" onClick={e => e.stopPropagation()}>
         {/* Pixel dots in corners */}
-        <div className="absolute top-2 left-2 w-3 h-3 bg-pixel-accent"></div>
-        <div className="absolute top-2 right-2 w-3 h-3 bg-pixel-accent"></div>
-        <div className="absolute bottom-2 left-2 w-3 h-3 bg-pixel-accent"></div>
-        <div className="absolute bottom-2 right-2 w-3 h-3 bg-pixel-accent"></div>
+        <div className="absolute top-2 left-2 w-2 h-2 md:w-3 md:h-3 bg-pixel-accent"></div>
+        <div className="absolute top-2 right-2 w-2 h-2 md:w-3 md:h-3 bg-pixel-accent"></div>
+        <div className="absolute bottom-2 left-2 w-2 h-2 md:w-3 md:h-3 bg-pixel-accent"></div>
+        <div className="absolute bottom-2 right-2 w-2 h-2 md:w-3 md:h-3 bg-pixel-accent"></div>
         
         {/* Modal Header */}
-        <div className="flex justify-center items-center mb-4">
-          <h2 className="text-2xl font-press-start text-pixel-accent text-center">
+        <div className="flex justify-center items-center mb-4 md:mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-press-start text-pixel-accent text-center">
             Mint Your Lilnad NFT
           </h2>
         </div>
         
         {/* Divider */}
-        <div className="border-b-2 border-pixel-purple-medium mb-4 w-1/2 mx-auto"></div>
+        <div className="border-b-2 border-pixel-purple-medium mb-4 md:mb-6 w-1/2 mx-auto"></div>
         
-        <div className="mb-6">
-          <p className="text-pixel-text mb-3 text-center">Mint your first Lilnad NFT to join the MonadWorld!</p>
-          <div className="grid grid-cols-2 gap-0 mb-3">
-            <div className="bg-pixel-purple-medium p-2 text-center">
-              <p className="text-pixel-text font-bold">SBT Collection</p>
-              <p className="text-sm text-pixel-text opacity-80">Earn Points Over Time</p>
+        <div className="mb-4 md:mb-6">
+          <p className="text-pixel-text mb-3 text-center text-sm sm:text-base">Mint your first Lilnad NFT to join the MonadWorld!</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-0 mb-3">
+            <div className="bg-pixel-purple-medium p-2 md:p-3 text-center">
+              <p className="text-pixel-text font-bold text-sm md:text-base">SBT Collection</p>
+              <p className="text-xs md:text-sm text-pixel-text opacity-80">Earn Points Over Time</p>
             </div>
-            <div className="bg-pixel-purple-medium p-2 text-center">
-              <p className="text-pixel-text font-bold">Rarity System</p>
-              <p className="text-sm text-pixel-text opacity-80">6 Rarity Levels</p>
+            <div className="bg-pixel-purple-medium p-2 md:p-3 text-center">
+              <p className="text-pixel-text font-bold text-sm md:text-base">Rarity System</p>
+              <p className="text-xs md:text-sm text-pixel-text opacity-80">6 Rarity Levels</p>
             </div>
           </div>
         </div>
         
-        <div className="flex justify-center gap-3">
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
           <button
             onClick={handleClose}
-            className="px-6 py-2 bg-gray-600 text-white text-lg font-vt323 font-bold rounded-none hover:bg-gray-700 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-gray-800"
+            className="px-4 py-2 md:px-6 md:py-2 bg-gray-600 text-white text-base md:text-lg font-vt323 font-bold rounded-none hover:bg-gray-700 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-gray-800"
           >
             CLOSE
           </button>
           <button 
             onClick={handleMintClick}
-            className="px-6 py-2 bg-pixel-accent text-black text-lg font-vt323 font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
+            className="px-4 py-2 md:px-6 md:py-2 bg-pixel-accent text-black text-base md:text-lg font-vt323 font-bold rounded-none hover:bg-yellow-400 transition-colors duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-4 border-r-4 border-amber-700"
           >
             MINT NOW <span className="ml-2 inline-block">→</span>
           </button>
@@ -387,40 +387,40 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-5rem)] relative overflow-hidden">
       {/* Hero Section */}
-      <div className="bg-pixel-purple-dark py-12 border-b border-white" style={{ paddingBottom: '10px' }}>
-        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-16">
+      <div className="bg-pixel-purple-dark py-6 md:py-8 lg:py-12 border-b border-white" style={{ paddingBottom: '10px' }}>
+        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-8 md:gap-12 lg:gap-16">
           <div className="w-full text-center mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-pixel-accent mb-3 font-press-start text-shadow-pixel">WELCOME TO MONADWORLD</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-pixel-accent mb-3 font-press-start text-shadow-pixel">WELCOME TO MONADWORLD</h1>
           </div>
           
           {/* Game Preview Slider */}
-          <div className="w-full flex items-center justify-center mb-8" style={{ paddingBottom: '10px' }}>
+          <div className="w-full flex items-center justify-center mb-4 md:mb-6 lg:mb-8" style={{ paddingBottom: '10px' }}>
             <button 
               onClick={prevPreview} 
-              className="text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 mr-4 focus:outline-none z-10"
+              className="text-2xl md:text-3xl lg:text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 mr-2 md:mr-4 focus:outline-none z-10"
               aria-label="Previous preview"
             >
               ‹
             </button>
             
-            <div className="relative w-[520px] md:w-[520px] h-[520px] md:h-[520px]">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] xl:w-[520px] xl:h-[520px]">
               {/* Pixel art frame - Black outer border */}
-              <div className="absolute inset-0 border-4 border-black z-5"></div>
+              <div className="absolute inset-0 border-2 md:border-4 border-black z-5"></div>
               
               {/* Black corner blocks */}
-              <div className="absolute top-0 left-0 w-3 h-3 bg-black z-10"></div>
-              <div className="absolute top-0 right-0 w-3 h-3 bg-black z-10"></div>
-              <div className="absolute bottom-0 left-0 w-3 h-3 bg-black z-10"></div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-black z-10"></div>
+              <div className="absolute top-0 left-0 w-2 h-2 md:w-3 md:h-3 bg-black z-10"></div>
+              <div className="absolute top-0 right-0 w-2 h-2 md:w-3 md:h-3 bg-black z-10"></div>
+              <div className="absolute bottom-0 left-0 w-2 h-2 md:w-3 md:h-3 bg-black z-10"></div>
+              <div className="absolute bottom-0 right-0 w-2 h-2 md:w-3 md:h-3 bg-black z-10"></div>
               
               {/* White pixels at inner corners with pulse animation */}
-              <div className="absolute top-3 left-3 w-2 h-2 bg-white z-15 animate-pulse-slow"></div>
-              <div className="absolute top-3 right-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '0.5s' }}></div>
-              <div className="absolute bottom-3 left-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute bottom-3 right-3 w-2 h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+              <div className="absolute top-2 left-2 md:top-3 md:left-3 w-1 h-1 md:w-2 md:h-2 bg-white z-15 animate-pulse-slow"></div>
+              <div className="absolute top-2 right-2 md:top-3 md:right-3 w-1 h-1 md:w-2 md:h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 w-1 h-1 md:w-2 md:h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 w-1 h-1 md:w-2 md:h-2 bg-white z-15 animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
               
               {/* Image container with proper spacing */}
-              <div className="absolute top-5 left-5 right-5 bottom-5 bg-black overflow-hidden z-1">
+              <div className="absolute top-3 left-3 right-3 bottom-3 md:top-5 md:left-5 md:right-5 md:bottom-5 bg-black overflow-hidden z-1">
                 <img 
                   src={`/NEW LILNAD MINTED/${previewImages[currentPreview]}`}
                   alt={`Game preview ${currentPreview + 1}`}
@@ -432,7 +432,7 @@ export default function HomePage() {
             
             <button 
               onClick={nextPreview} 
-              className="text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 ml-4 focus:outline-none z-10"
+              className="text-2xl md:text-3xl lg:text-4xl text-pixel-accent hover:text-yellow-300 transition-colors duration-150 ml-2 md:ml-4 focus:outline-none z-10"
               aria-label="Next preview"
             >
               ›
@@ -440,12 +440,12 @@ export default function HomePage() {
           </div>
           
           {/* Slide indicator dots */}
-          <div className="flex justify-center space-x-2 mb-20">
+          <div className="flex justify-center space-x-2 mb-8 md:mb-12 lg:mb-20">
             {previewImages.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentPreview(index)}
-                className={`w-3 h-3 rounded-full focus:outline-none transition-colors duration-200 ${
+                className={`w-2 h-2 md:w-3 md:h-3 rounded-full focus:outline-none transition-colors duration-200 ${
                   currentPreview === index 
                     ? 'bg-pixel-accent' 
                     : 'bg-gray-600 hover:bg-gray-500'
@@ -456,20 +456,23 @@ export default function HomePage() {
           </div>
           
           {/* Action Buttons */}
-          <div className="flex gap-5 flex-wrap justify-center mt-20" style={{ marginTop: '15px' }}>
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-5 flex-wrap justify-center mt-8 md:mt-12 lg:mt-20" style={{ marginTop: '15px' }}>
             <button 
               onClick={() => setShowMintModal(true)}
-              className="px-5 py-3 bg-pixel-accent text-black text-lg font-press-start font-bold rounded-none hover:bg-yellow-400 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-amber-700"
+              className="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-pixel-accent text-black text-sm sm:text-base md:text-lg font-press-start font-bold rounded-none hover:bg-yellow-400 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-amber-700"
             >
-              MINT YOUR FIRST NFT <span className="ml-2 inline-block">→</span>
+              <span className="hidden sm:inline">MINT YOUR FIRST NFT</span>
+              <span className="sm:hidden">MINT NFT</span>
+              <span className="ml-2 inline-block">→</span>
             </button>
             
             {isConnected && nftCount > 0 && (
               <button 
                 onClick={handleViewCollection}
-                className="px-5 py-3 bg-pixel-purple-medium text-pixel-accent text-lg font-vt323 font-bold rounded-none hover:bg-purple-700 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-purple-900"
+                className="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-pixel-purple-medium text-pixel-accent text-sm sm:text-base md:text-lg font-vt323 font-bold rounded-none hover:bg-purple-700 transition-all duration-150 shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] border-b-2 border-r-2 border-purple-900"
               >
-                VIEW YOUR COLLECTION
+                <span className="hidden sm:inline">VIEW YOUR COLLECTION</span>
+                <span className="sm:hidden">VIEW COLLECTION</span>
                 <span className="ml-2 inline-block">→</span>
               </button>
             )}
@@ -478,20 +481,20 @@ export default function HomePage() {
       </div>
       
       {/* Features Section */}
-      <div className="page-features-section py-12 bg-pixel-purple-dark border-t-4 border-b-4 border-pixel-purple-medium">
-        <div className="container mx-auto px-4"style={{ marginTop: '10px' }}>
-          <div className="text-center mb-10">
-            <h2 className="inline-block px-6 py-2 text-2xl md:text-3xl font-press-start text-white">
+      <div className="page-features-section py-6 md:py-8 lg:py-12 bg-pixel-purple-dark border-t-4 border-b-4 border-pixel-purple-medium">
+        <div className="container mx-auto px-4" style={{ marginTop: '10px' }}>
+          <div className="text-center mb-6 md:mb-8 lg:mb-10">
+            <h2 className="inline-block px-4 py-2 md:px-6 md:py-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-press-start text-white">
               LILNAD NFT FEATURES
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="relative overflow-hidden flex flex-col w-full mx-auto"
-                style={{ minHeight: "300px", marginBottom: "15px" }}
+                className="relative overflow-hidden flex flex-col w-full mx-auto min-h-[280px] sm:min-h-[300px] md:min-h-[320px]"
+                style={{ marginBottom: "15px" }}
               >
                 {/* Pixel dot in top-left corner - Adjusted for border */}
                 <div className="absolute top-[4px] left-[4px] w-2 h-2 bg-white z-10"></div>
@@ -499,25 +502,25 @@ export default function HomePage() {
                 <div className="absolute top-[4px] right-[4px] w-2 h-2 bg-white z-10"></div>
                 
                 {/* Header - Purple background with yellow text */}
-                <div className="bg-pixel-purple-medium py-5 px-3 flex justify-center items-center border-b-2 border-black">
-                  <h3 className="text-center text-2xl md:text-2xl lg:text-3xl font-press-start text-pixel-accent whitespace-pre-line leading-tight">
+                <div className="bg-pixel-purple-medium py-4 md:py-5 px-3 flex justify-center items-center border-b-2 border-black">
+                  <h3 className="text-center text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-press-start text-pixel-accent whitespace-pre-line leading-tight">
                     {feature.title}
                   </h3>
                 </div>
                 
                 {/* Content - Black background with centered text */}
-                <div className="bg-black p-6 flex-grow flex flex-col justify-between items-center text-center">
+                <div className="bg-black p-3 md:p-4 lg:p-6 flex-grow flex flex-col justify-between items-center text-center">
                   <div className="w-full flex-grow flex items-center justify-center">
-                    <p className="text-pixel-accent font-vt323 text-xl md:text-2xl lg:text-3xl leading-relaxed text-center px-3 md:px-6">
+                    <p className="text-pixel-accent font-vt323 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl leading-relaxed text-center px-2 md:px-3 lg:px-6">
                       {feature.description}
                     </p>
                   </div>
                   
                   {/* Learn More button */}
-                  <div className="mt-4 w-full">
+                  <div className="mt-3 md:mt-4 w-full">
                     <button 
                       onClick={() => toggleFeatureDetails(index)} 
-                      className={`w-full font-pixel text-base md:text-lg py-2 text-center shadow-pixel border-b-4 border-r-4 border-black transition-colors duration-150 ${
+                      className={`w-full font-pixel text-sm sm:text-base md:text-lg py-2 text-center shadow-pixel border-b-4 border-r-4 border-black transition-colors duration-150 ${
                         index === 2 
                           ? "bg-purple-400 text-white hover:bg-purple-500 soon-button" 
                           : "bg-pixel-accent text-black hover:bg-yellow-400"
