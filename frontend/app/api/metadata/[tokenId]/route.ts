@@ -15,10 +15,10 @@ const BACKEND_URL = process.env.BACKEND_URL || process.env.BACKEND_PUBLIC_URL ||
 
 export async function GET(
   request: Request,
-  { params }: { params: { tokenId: string } }
+  { params }: { params: Promise<{ tokenId: string }> }
 ) {
   try {
-    const tokenId = params.tokenId;
+    const { tokenId } = await params;
     
     if (!tokenId || isNaN(Number(tokenId))) {
       return NextResponse.json({ error: 'Invalid token ID' }, { status: 400 });
